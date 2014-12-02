@@ -28,12 +28,11 @@ public class MainActivity extends Activity implements android.os.Handler.Callbac
 	TextView trafficTextView = null;
 	
 	Button getButton = null;
-	
-	SignalStrength signalStrength = null;
-    MeasureUmtsThread measureUmtsThread = null; 
     
-    private static  Handler mHandler = null;
-  
+	//Handler
+    private  final Handler mHandler = new Handler(Looper.getMainLooper(), this);
+    //测量UMTS
+    private final MeasureUmts  mMeasureUmts = new MeasureUmts(MainActivity.this, mHandler);
 	
 	//在完整生存期时开始调用
 	@Override
@@ -51,7 +50,7 @@ public class MainActivity extends Activity implements android.os.Handler.Callbac
 		getButton =(Button)findViewById(R.id.getButton);
 		
 		//mHanler
-		mHandler = new Handler(Looper.getMainLooper(), this);
+		;
 		
 		getButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -59,26 +58,24 @@ public class MainActivity extends Activity implements android.os.Handler.Callbac
 				// TODO Auto-generated method stub
 				umtsTextView.setText("on");
 				wifiTextView.setText("up");
-				trafficTextView.setText("down");
+				trafficTextView.setText("down");	
 				
-				//测量线程  
-				
-				measureUmtsThread = new MeasureUmtsThread(MainActivity.this,mHandler); //MainActivity.this  not this
 				//开启测量
-				GlobalVar.isMeasureThreadStop = false;
-				GlobalVar.isMeasureThreadWait = false;
-				new Thread(measureUmtsThread).start();
+				mMeasureUmts.initMeasure();
 			}
 		});
 	}
 
 
+	//发送给UI(Main-Thread)的消息，在此处理
 	@Override
 	public boolean handleMessage(Message msg) {
 		// TODO Auto-generated method stub
+		
 		switch (msg.what) {
-		case 0:
-			umtsTextView.setText(msg.obj.toString());
+		case GlobalVar.MSG_HANDLER_MEASURE_UTMS:
+			Bundle data = msg.getData();
+			umtsTextView.setText(data.toString());
 			break;
 
 		default:

@@ -7,11 +7,8 @@ public class GlobalVar {
 	/**
 	 *消息处理标识 
 	 */
+	public static final int MSG_HANDLER_MEASURE_UTMS = 0x01; //UTMS测量
 	
-	public static enum MSG_FLAG_INT
-	{
-		utms_measure_data /*获取的UTMS测量结果*/
-	}
 	
 	/**
 	 * 控制UTMS测量线程

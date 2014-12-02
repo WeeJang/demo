@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/wiFiTextView"
+        android:layout_width="257dp"
+        android:layout_height="94dp"
+        android:layout_x="31dp"
+        android:layout_y="16dp"
+        android:text="WiFi" />
+
+    <TextView
+        android:id="@+id/umtsTextView"
+        android:layout_width="264dp"
+        android:layout_height="82dp"
+        android:layout_x="26dp"
+        android:layout_y="129dp"
+        android:text="UMTS" />
+
+    <TextView
+        android:id="@+id/trafficTextView"
+        android:layout_width="252dp"
+        android:layout_height="164dp"
+        android:layout_x="24dp"
+        android:layout_y="245dp"
+        android:text="Traffic" />
+
+    <Button
+        android:id="@+id/getButton"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_x="216dp"
+        android:layout_y="422dp"
+        android:text="GET" />
+
+</AbsoluteLayout>

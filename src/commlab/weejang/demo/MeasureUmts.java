@@ -183,8 +183,7 @@ public class MeasureUmts{
 	
 	
 	//监听器负责更新（观察者模式）
-	
-	private class MyPhoneStateListener extends PhoneStateListener{
+		private class MyPhoneStateListener extends PhoneStateListener{
 		
 		@Override
 		public void onServiceStateChanged(ServiceState serviceState){

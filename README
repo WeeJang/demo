@@ -1,0 +1,8 @@
+This Project is Building for QoE
+
+
+-------------------
+	1 implement Measure_UTMS 
+		Technique : [Looper,Handler,MessageQueue,Message] [Reflect]
+
+

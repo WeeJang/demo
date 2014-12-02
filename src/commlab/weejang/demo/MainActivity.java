@@ -66,8 +66,9 @@ public class MainActivity extends Activity implements android.os.Handler.Callbac
 		});
 	}
 
-
-	//发送给UI(Main-Thread)的消息，在此处理
+	
+	//发送给UI(Main-Thread)的消息，在此处理，实现android.os.Handler.Callback接口[优先级：2]
+	//
 	@Override
 	public boolean handleMessage(Message msg) {
 		// TODO Auto-generated method stub

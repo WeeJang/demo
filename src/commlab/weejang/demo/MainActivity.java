@@ -1,14 +1,17 @@
 package commlab.weejang.demo;
 
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
 import android.app.Activity;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,7 +24,7 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity implements android.os.Handler.Callback {
 	
-
+	private static final String TAG = "MainActivity";
 	//控件
 	TextView umtsTextView = null;
 	TextView wifiTextView = null;
@@ -60,7 +63,7 @@ public class MainActivity extends Activity implements android.os.Handler.Callbac
 				wifiTextView.setText("up");
 				trafficTextView.setText("down");	
 				
-				//开启测量
+				//开启UMTS测量
 				mMeasureUmts.initMeasure();
 			}
 		});
@@ -72,11 +75,21 @@ public class MainActivity extends Activity implements android.os.Handler.Callbac
 	@Override
 	public boolean handleMessage(Message msg) {
 		// TODO Auto-generated method stub
-		
+	
 		switch (msg.what) {
 		case GlobalVar.MSG_HANDLER_MEASURE_UTMS:
-			Bundle data = msg.getData();
-			umtsTextView.setText(data.toString());
+			Bundle data = msg.getData();			
+			
+			if (data!=null) {
+				Long timeStamp = data.getLong("timestamp");
+				HashMap<String, String> measureData = (HashMap<String, String>) data.getSerializable("data");
+				
+				//Log.v(TAG,timeStamp + ": " + measureData);
+				
+				if ((timeStamp != null)&&(measureData != null)) {
+					umtsTextView.setText(timeStamp + ": " + measureData.toString());
+				}
+			}
 			break;
 
 		default:

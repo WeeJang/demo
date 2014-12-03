@@ -14,7 +14,7 @@
     <TextView
         android:id="@+id/umtsTextView"
         android:layout_width="264dp"
-        android:layout_height="82dp"
+        android:layout_height="146dp"
         android:layout_x="26dp"
         android:layout_y="129dp"
         android:text="UMTS" />
@@ -22,9 +22,9 @@
     <TextView
         android:id="@+id/trafficTextView"
         android:layout_width="252dp"
-        android:layout_height="164dp"
+        android:layout_height="119dp"
         android:layout_x="24dp"
-        android:layout_y="245dp"
+        android:layout_y="288dp"
         android:text="Traffic" />
 
     <Button

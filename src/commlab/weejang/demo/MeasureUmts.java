@@ -43,11 +43,12 @@ public class MeasureUmts{
 	//成员变量
 	private Handler mHandler = null;
 	private Context mContext = null;
-	private TelephonyManager telephonyManager = null;
 	
 	//存储测量信息
-	private HashMap<String, String> infoHashMap ;
+	private static HashMap<String, String> infoHashMap = new HashMap<String,String>();
 	
+	//管理器
+	TelephonyManager telephonyManager = null;
 	
 	//运营商标识
 	/**
@@ -66,14 +67,8 @@ public class MeasureUmts{
 	private Bundle data = new Bundle();
 
 	//跟LTE相关的API都被@hide了，怎么获得?  :) 反射！
-	static  Class SS ;
-	static Constructor<SignalStrength> constructor ;
-	static SignalStrength instanceSignalStrength ;
-//	static Method methodGetLteSignalStrength ;
-//	static Method methodGetLteRsrp ;
-//	static Method methodGetLteRsrq ;
-//	static Method methodGetLteRssnr ;
-//	static Method methodGetLteCqi;
+	static  Class<?> SS ;
+
 //	//是获取Method(成员函数),不用这么麻烦，直接获取Field(成员变量)
 
 	static Field lteSignalStrengthField;
@@ -86,47 +81,33 @@ public class MeasureUmts{
 	
 	//加载反射相关，动态加载
 	static{
-
 			try {
 				SS = Class.forName("android.telephony.SignalStrength");
-				constructor = SS.getConstructor(null);
-				instanceSignalStrength = constructor.newInstance(null);
-				
-				lteSignalStrengthField = SS.getField("mLteSignalStrength");
-				lteRsrpField = SS.getField("mLteRsrp");
-				lteRsrqField = SS.getField("mLteRsrq");
-				lteRssnrField = SS.getField("mLteRssnr");
-				lteCqiField = SS.getField("mLteCqi");
-//				methodGetLteSignalStrength = SS.getMethod("getLteSignalStrength", null);
-//				methodGetLteRsrp = SS.getMethod("getLteRsrp", null);
-//				methodGetLteRsrq = SS.getMethod("getLteRsrq", null);
-//				methodGetLteRssnr = SS.getMethod("getLteRssnr", null);
-//				methodGetLteCqi = SS.getMethod("getLteCqi", null);
 		
+				lteSignalStrengthField = SS.getDeclaredField("mLteSignalStrength");
+				lteRsrpField = SS.getDeclaredField("mLteRsrp");
+				lteRsrqField = SS.getDeclaredField("mLteRsrq");
+				lteRssnrField = SS.getDeclaredField("mLteRssnr");
+				lteCqiField = SS.getDeclaredField("mLteCqi");
+				
+				//提升权限
+				lteSignalStrengthField.setAccessible(true);
+				lteRsrpField.setAccessible(true);
+				lteRsrqField.setAccessible(true);
+				lteRssnrField.setAccessible(true);
+				lteCqiField.setAccessible(true);
+				
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (NoSuchFieldException e) {
+			}  catch (NoSuchFieldException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	
-  
 	}
 	
 	/**
@@ -137,7 +118,6 @@ public class MeasureUmts{
 	{
 		this.mHandler = handler;
 		this.mContext = context;
-		this.telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
 	}
 	
 	
@@ -146,6 +126,7 @@ public class MeasureUmts{
 	public void initMeasure()
 	{
 		//设置监听  : 这里有大量信息
+		telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
 		telephonyManager.listen(new MyPhoneStateListener(), PhoneStateListener.LISTEN_SIGNAL_STRENGTHS | PhoneStateListener.LISTEN_SERVICE_STATE);
 		//获取运营商
 		getMark();
@@ -175,6 +156,9 @@ public class MeasureUmts{
 		data.clear();
 		data.putLong("timestamp", System.currentTimeMillis());
 		data.putSerializable("data", infoHashMap);
+		msg.setData(data);
+		
+		Log.i(TAG,System.currentTimeMillis() + ": "+ infoHashMap.toString());
 		
 		mHandler.sendMessage(msg);
 	}
@@ -289,6 +273,7 @@ public class MeasureUmts{
 	    	infoHashMap.put("mEvdoSnr",String.valueOf(signalStrength.getEvdoSnr()));
 	    	infoHashMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
 
+	   
 	    	
 	    	//infoHashMap.put("mLteSignalStrength", String.valueOf(signalStrength.getLteSignalStrength()));
 	    	//反射获取
@@ -306,6 +291,8 @@ public class MeasureUmts{
 				e.printStackTrace();
 			}
 	    	
+	     	Log.i(TAG,infoHashMap.toString());
+	    	
 	    	//刷新后投递消息
 	    	sendInfo();
 	    	
@@ -322,10 +309,7 @@ public class MeasureUmts{
 	    }
 
 
-	}
-	
-	
-	
+	}	
 	
 	
 }

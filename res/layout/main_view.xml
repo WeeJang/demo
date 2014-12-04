@@ -29,10 +29,18 @@
 
     <Button
         android:id="@+id/getButton"
-        android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_x="216dp"
-        android:layout_y="422dp"
+        android:layout_width="89dp"
+        android:layout_height="wrap_content"
+        android:layout_x="10dp"
+        android:layout_y="412dp"
         android:text="GET" />
+
+    <Button
+        android:id="@+id/noteButton"
+        android:layout_width="89dp"
+        android:layout_height="wrap_content"
+        android:layout_x="197dp"
+        android:layout_y="408dp"
+        android:text="Note" />
 
 </AbsoluteLayout>

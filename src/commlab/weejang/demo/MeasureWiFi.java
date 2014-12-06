@@ -2,6 +2,8 @@ package commlab.weejang.demo;
 
 import java.util.HashMap;
 
+import commlab.weejang.demo.utils.GlobalVar;
+
 import android.content.Context;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiEnterpriseConfig;

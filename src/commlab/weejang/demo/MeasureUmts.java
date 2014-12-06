@@ -7,10 +7,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
+import commlab.weejang.demo.utils.GlobalVar;
 import android.R.string;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
+import android.content.res.Resources.Theme;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,7 +33,7 @@ import android.util.Log;
  * 
  * @author jangwee
  *
- *         之前开启一个线程，投递消息。后来发现与监听器（观察者模式）冲突，就把线程去掉了。
+ *         之前开启一个线程，投递消息。。
  *
  */
 
@@ -124,40 +126,43 @@ public class MeasureUmts
 	// 启动测量，
 	public void initMeasureProc()
 	{
-		// 设置监听 : 这里有大量信息
-		telephonyManager = (TelephonyManager) mContext
+		
+		GlobalVar.isMeasureUMTSThreadRun = true;
+		
+		telephonyManager = (TelephonyManager)mContext 
 				.getSystemService(Context.TELEPHONY_SERVICE);
+		
+		// 设置监听 : 这里有大量信息
 		telephonyManager.listen(new MyPhoneStateListener(),
 				PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
 						| PhoneStateListener.LISTEN_SERVICE_STATE);
 		// 获取运营商
-		getMark();
-
+//		getMark();
+		
+		new Thread(new MeasureThread()).start();
 	}
 	
 	//停止测量
 	public void stopMeasureProc()
 	{
 		//估计没什么用
-		this.telephonyManager = null;
-		System.gc();
 	}
 
 	// 确定接入运营商
-	private void getMark()
-	{
-		String networkOperatorString = telephonyManager.getNetworkOperator();
-		for (int i = 0; i < 3; i++)
-		{
-			netOperatorMark = -1;
-			if (networkOperatorString.equals(networkOperator[i]))
-			{
-				netOperatorMark = i;
-				Log.v(TAG, "networkMark + " + netOperatorMark);
-				break;
-			}
-		}
-	}
+//	private void getMark()
+//	{
+//		String networkOperatorString = telephonyManager.getNetworkOperator();
+//		for (int i = 0; i < 3; i++)
+//		{
+//			netOperatorMark = -1;
+//			if (networkOperatorString.equals(networkOperator[i]))
+//			{
+//				netOperatorMark = i;
+//				Log.v(TAG, "networkMark + " + netOperatorMark);
+//				break;
+//			}
+//		}
+//	}
 
 	// 投递消息给处理
 	private void sendMeasureData()
@@ -172,6 +177,35 @@ public class MeasureUmts
 		Log.i(TAG, System.currentTimeMillis() + ": " + infoHashMap.toString());
 
 		mHandler.sendMessage(msg);
+	}
+	
+	
+	
+	//测量线程
+	private class MeasureThread implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			// TODO Auto-generated method stub
+			while (GlobalVar.isMeasureUMTSThreadRun)
+			{
+				synchronized (this)
+				{
+					sendMeasureData();
+				}
+				
+				try
+				{
+					Thread.currentThread().sleep(3000);
+				} catch (Exception e)
+				{
+					// TODO: handle exception
+					e.printStackTrace();
+				}
+			}
+				
+		}
 	}
 
 	// 监听器负责更新（观察者模式）
@@ -239,6 +273,8 @@ public class MeasureUmts
 		 */
 		public void onSignalStrengthsChanged(SignalStrength signalStrength)
 		{
+			
+			Log.i(TAG, "Error~~~~~~~~~~~~~~~~~~~~~~~");
 			super.onSignalStrengthsChanged(signalStrength);
 
 			// 更新测量值
@@ -264,53 +300,52 @@ public class MeasureUmts
 			 * mLteSignalStrength + " " + mLteRsrp + " " + mLteRsrq + " " +
 			 * mLteRssnr + " " + mLteCqi + " " + (isGsm ? "gsm|lte" : "cdma"
 			 */
-
-			infoHashMap.clear();
-			infoHashMap.put("mGsmSignalStrength",
-					String.valueOf(signalStrength.getGsmSignalStrength()));
-			infoHashMap.put("mGsmBitErrorRate",
-					String.valueOf(signalStrength.getGsmBitErrorRate()));
-			infoHashMap.put("mCdmaDbm",
-					String.valueOf(signalStrength.getCdmaDbm()));
-			infoHashMap.put("mCdmaEcio",
-					String.valueOf(signalStrength.getCdmaEcio()));
-			infoHashMap.put("mEvdoDbm",
-					String.valueOf(signalStrength.getEvdoDbm()));
-			infoHashMap.put("mEvdoEcio",
-					String.valueOf(signalStrength.getEvdoEcio()));
-			infoHashMap.put("mEvdoSnr",
-					String.valueOf(signalStrength.getEvdoSnr()));
-			infoHashMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
-
-			// infoHashMap.put("mLteSignalStrength",
-			// String.valueOf(signalStrength.getLteSignalStrength()));
-			// 反射获取
-
-			try
+			Log.i(TAG, "Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+			
+			synchronized (this)
 			{
-				infoHashMap.put("mLteSignalStrength", String
-						.valueOf(lteSignalStrengthField.get(signalStrength)));
-				infoHashMap.put("mLteRsrp",
-						String.valueOf(lteRsrpField.get(signalStrength)));
-				infoHashMap.put("mLteRsrq",
-						String.valueOf(lteRsrqField.get(signalStrength)));
-				infoHashMap.put("mLteCqi",
-						String.valueOf(lteCqiField.get(signalStrength)));
-			} catch (IllegalAccessException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalArgumentException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				infoHashMap.clear();
+				infoHashMap.put("mGsmSignalStrength",
+						String.valueOf(signalStrength.getGsmSignalStrength()));
+				infoHashMap.put("mGsmBitErrorRate",
+						String.valueOf(signalStrength.getGsmBitErrorRate()));
+				infoHashMap.put("mCdmaDbm",
+						String.valueOf(signalStrength.getCdmaDbm()));
+				infoHashMap.put("mCdmaEcio",
+						String.valueOf(signalStrength.getCdmaEcio()));
+				infoHashMap.put("mEvdoDbm",
+						String.valueOf(signalStrength.getEvdoDbm()));
+				infoHashMap.put("mEvdoEcio",
+						String.valueOf(signalStrength.getEvdoEcio()));
+				infoHashMap.put("mEvdoSnr",
+						String.valueOf(signalStrength.getEvdoSnr()));
+				infoHashMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
+
+				// infoHashMap.put("mLteSignalStrength",
+				// String.valueOf(signalStrength.getLteSignalStrength()));
+				// 反射获取
+
+				try
+				{
+					infoHashMap.put("mLteSignalStrength", String
+							.valueOf(lteSignalStrengthField.get(signalStrength)));
+					infoHashMap.put("mLteRsrp",
+							String.valueOf(lteRsrpField.get(signalStrength)));
+					infoHashMap.put("mLteRsrq",
+							String.valueOf(lteRsrqField.get(signalStrength)));
+					infoHashMap.put("mLteCqi",
+							String.valueOf(lteCqiField.get(signalStrength)));
+				} catch (IllegalAccessException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
-
-			Log.i(TAG, infoHashMap.toString());
-
-			// 刷新后投递消息
-			sendMeasureData();
-
 		}
 
 		@Override
@@ -325,5 +360,9 @@ public class MeasureUmts
 		}
 
 	}
+
+
+
+
 
 }

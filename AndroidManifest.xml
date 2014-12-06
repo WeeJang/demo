@@ -32,10 +32,10 @@
         
         <service
             android:enabled="true"
-            android:name=".NoteService"
+            android:name=".MeasureService"
             >
             <intent-filter >
-                <action android:name="commlab.weejang.demo.NoteService"/>
+                <action android:name="commlab.weejang.demo.MeasureService"/>
             </intent-filter>
         </service>
     

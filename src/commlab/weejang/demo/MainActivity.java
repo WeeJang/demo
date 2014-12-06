@@ -3,12 +3,15 @@ package commlab.weejang.demo;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import commlab.weejang.demo.utils.GlobalVar;
 import android.app.Activity;
+import android.content.Intent;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.widget.SimpleCursorAdapter.ViewBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.util.Log;
@@ -21,27 +24,23 @@ import android.widget.TextView;
  * @author jangwee UI
  */
 
-public class MainActivity extends Activity implements
-		android.os.Handler.Callback
+public class MainActivity extends Activity implements View.OnClickListener
 {
 
 	private static final String TAG = "MainActivity";
-	// 控件
-	TextView umtsTextView = null;
-	TextView wifiTextView = null;
-	TextView trafficTextView = null;
-
-	Button getButton = null;
-
-	// Handler
-	private final Handler mHandler = new Handler(Looper.getMainLooper(), this);
-	// 测量UMTS
-	private final MeasureUmts mMeasureUmts = new MeasureUmts(MainActivity.this,mHandler);
-	// 测量WiFi
-	private final MeasureWiFi mMeasureWiFi = new MeasureWiFi(MainActivity.this, mHandler);
-	//测量Traffic
-	private final MeasureTraffic mMeasureTraffic = new MeasureTraffic(mHandler);
 	
+	private Intent intent;
+	
+	// 控件
+//	TextView umtsTextView = null;
+//	TextView wifiTextView = null;
+//	TextView trafficTextView = null;
+//	Button getButton = null;
+		
+	Button startBtn;
+	Button pauseBtn;
+	Button stopBtn;
+	TextView statuTView;
 	
 	// 在完整生存期时开始调用
 	@Override
@@ -49,112 +48,69 @@ public class MainActivity extends Activity implements
 	{
 		super.onCreate(savedInstanceState);
 
-		// 初始化一个Activity,并填充UI
-		this.setContentView(R.layout.main_view);
-
-		// 获取控件
-		umtsTextView = (TextView) findViewById(R.id.umtsTextView);
-		wifiTextView = (TextView) findViewById(R.id.wiFiTextView);
-		trafficTextView = (TextView) findViewById(R.id.trafficTextView);
-		getButton = (Button) findViewById(R.id.getButton);
-
-
-
-		getButton.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				// TODO Auto-generated method stub
-				umtsTextView.setText("on");
-				wifiTextView.setText("up");
-				trafficTextView.setText("down");
-
-				// 开启UMTS测量
-				mMeasureUmts.initMeasureProc();
-				//开启WiFi测量
-				mMeasureWiFi.initMeasureProc();
-				//开启Traffic测量
-				mMeasureTraffic.initMeasureProc();
-			}
-		});
-	}
-
-	
-//	@Override
-//	public void onStop() 
-//	{
-//	//	mMeasureWiFi.stopMeasureProc();
-//	//	mMeasureUmts.stopMeasureProc();
-//	//	mMeasureTraffic.stopMeasureProc();
-//	}
-	
-	
+//		// 初始化一个Activity,并填充UI
+//		this.setContentView(R.layout.main_view);
+//		// 获取控件
+//		umtsTextView = (TextView) findViewById(R.id.umtsTextView);
+//		wifiTextView = (TextView) findViewById(R.id.wiFiTextView);
+//		trafficTextView = (TextView) findViewById(R.id.trafficTextView);
+//		getButton = (Button) findViewById(R.id.getButton);
 		
-	// 发送给UI(Main-Thread)的消息，在此处理，实现android.os.Handler.Callback接口[优先级：2]
-	//
-	@Override
-	public boolean handleMessage(Message msg)
-	{
-		// TODO Auto-generated method stub
+		this.setContentView(R.layout.service_view);
+		startBtn = (Button)findViewById(R.id.startBtn);
+		pauseBtn =(Button)findViewById(R.id.pauseBtn);
+		stopBtn = (Button)findViewById(R.id.stopBtn);
+		
+		
+		startBtn.setOnClickListener(this);
+		pauseBtn.setOnClickListener(this);
+		stopBtn.setOnClickListener(this);
 
-		// data 格式 统一 ： timestamp + flag(omit) + datadetai
-		Bundle data = msg.getData();
-		if (data == null)
+	}
+		
+		public void onClick(View v)
 		{
-			return false;
-		}
-
-		// 无时间戳，无效
-		Long timeStamp = data.getLong("timestamp");
-		if (timeStamp == null)
-		{
-			return false;
-		}
-
-		switch (msg.what)
-		{
-		// 处理UMTS
-		case GlobalVar.MSG_HANDLER_MEASURE_UMTS:
-
-			HashMap<String, String> umtsMeasureData = (HashMap<String, String>) data
-					.getSerializable("data");
-			// Log.v(TAG,timeStamp + ": " + measureData);
-			if (umtsMeasureData != null)
+			
+			intent = new Intent("commlab.weejang.demo.MeasureService");
+			int operatorFlag  = GlobalVar.SERVICE_OPERATOR_FLAG_INVALID;
+			
+			switch (v.getId())
 			{
-				umtsTextView.setText(timeStamp + ": "
-						+ umtsMeasureData);
-			}
-
-			break;
-		// 处理WiFi
-		case GlobalVar.MSG_HANDLER_MEASURE_WIFI:
-
-			HashMap<String, String> wifiMeasureData = (HashMap<String, String>) data
-					.getSerializable("data");
-			if (wifiMeasureData != null)
-			{
-				wifiTextView.setText(timeStamp + ": " +wifiMeasureData);
+			//启动测量
+			case R.id.startBtn:
+					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_START;
+					
+					Log.i(TAG, "startBtn");
+					
+				break;
+			//暂停测量
+			case R.id.pauseBtn:
+					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_PAUSE;
+					
+					Log.i(TAG, "pauseBtn");
+				break;
+				
+			//终止测量
+			case R.id.stopBtn:
+					//终止服务
+				 	operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_STOP;
+				
+				 	Log.i(TAG, "stopBtn");
+				 break;
+			default:
+				break;
 			}
 			
-			break;
-		
-		case GlobalVar.MSG_HANDLER_MEASURE_TRAFFIC:
-				HashMap<String, String>  trafficMeasureData = (HashMap<String, String>)data
-					.getSerializable("data");
-				if (trafficMeasureData != null)
-				{
-					trafficTextView.setText(timeStamp + ": " + trafficMeasureData);
-				}
-			break;
+			Bundle bundle = new Bundle();
+			bundle.putInt("OPF",operatorFlag);
+			
+			intent.putExtras(bundle);
+			//启动服务
+			startService(intent);
 
-		default:
-			break;
 		}
 
-		return false;
-	}
+	
 
-	// Handler -Main
 
 }

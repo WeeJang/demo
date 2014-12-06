@@ -1,4 +1,4 @@
-package commlab.weejang.demo;
+package commlab.weejang.demo.utils;
 
 import java.io.File;
 import java.io.FileOutputStream;

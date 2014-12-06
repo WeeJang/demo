@@ -2,6 +2,8 @@ package commlab.weejang.demo;
 
 import java.util.HashMap;
 
+import commlab.weejang.demo.utils.GlobalVar;
+
 import android.net.TrafficStats;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,8 +26,7 @@ public class MeasureTraffic
 	//存储测量信息,这里面要有测量点的时间戳（measuretimestamp），跟发送的时间戳(sendtimestamp)不一样，为了计算速率准确。
 	private static HashMap<String, String> infoMap = new HashMap<String,String>();
 	
-	//控制测量线程
-	private static boolean isMeasureRun = false;
+
 	
 	private Bundle data = new Bundle();
 	
@@ -38,7 +39,7 @@ public class MeasureTraffic
 	//开启测量
 	public void initMeasureProc()
 	{
-		isMeasureRun = true;
+		GlobalVar.isMeasureTrafficThreadRun = true;
 		//开启线程
 		new Thread(new measureThread()).start();
 		
@@ -49,7 +50,7 @@ public class MeasureTraffic
 	//关闭测量进程
 	public void stopMeasureProc()
 	{
-		isMeasureRun = false;
+		GlobalVar.isMeasureTrafficThreadRun = false;
 	}
 	
 	//发送测量信息
@@ -71,7 +72,7 @@ public class MeasureTraffic
 	{
 		public void run()
 		{
-			while (isMeasureRun)
+			while (GlobalVar.isMeasureTrafficThreadRun)
 			{
 				//更新信息
 				//long lastMearsureTimeStamp = Long.valueOf(infoMap.get("measuretimestamp"));

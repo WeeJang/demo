@@ -9,11 +9,9 @@ package commlab.weejang.demo.db;
  */
 
 import commlab.weejang.demo.utils.GlobalVar;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.Settings.Global;
 
 public class DBHelper extends SQLiteOpenHelper
 {
@@ -34,11 +32,13 @@ public class DBHelper extends SQLiteOpenHelper
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
+		//db.execSQL("DROP TABLE IF EXISTS " + GlobalVar.dbTableName);
 		// TODO Auto-generated method stub
 		db.execSQL("CREATE TABLE IF NOT EXISTS "+GlobalVar.dbTableName +
-								"(_id INTEGER PRIMARY KEY AUTOINCREMENT,date_type VARCHAR,info TEXT)");
+								"(_id INTEGER PRIMARY KEY AUTOINCREMENT,time_stamp VARCHAR,data_type VARCHAR,data_info TEXT)");
 		
 	}
+	
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
@@ -47,4 +47,5 @@ public class DBHelper extends SQLiteOpenHelper
 
 	}
 
+	
 }

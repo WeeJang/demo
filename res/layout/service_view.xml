@@ -19,14 +19,6 @@
         android:layout_y="104dp"
         android:text="PauseMeasure" />
 
-    <Button
-        android:id="@+id/stopBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="18dp"
-        android:layout_y="173dp"
-        android:text="StopMeasure" />
-
     <TextView
         android:id="@+id/statuTextView"
         android:layout_width="wrap_content"
@@ -34,5 +26,21 @@
         android:layout_x="16dp"
         android:layout_y="394dp"
         android:text="" />
+
+    <Button
+        android:id="@+id/continueBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="174dp"
+        android:text="Continue" />
+
+    <Button
+        android:id="@+id/stopBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="20dp"
+        android:layout_y="242dp"
+        android:text="StopMeasure" />
 
 </AbsoluteLayout>

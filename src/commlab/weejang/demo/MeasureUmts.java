@@ -1,68 +1,42 @@
 package commlab.weejang.demo;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
+import commlab.weejang.demo.interfaces.Measurable;
 import commlab.weejang.demo.utils.GlobalVar;
-import android.R.string;
 import android.annotation.SuppressLint;
-import android.app.Service;
 import android.content.Context;
-import android.content.res.Resources.Theme;
-import android.location.Location;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.provider.ContactsContract.Contacts.Data;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.text.StaticLayout;
 import android.util.Log;
 
 /**
- * 监听3G信号，向主线程投递消息，UI显示
+ *
  * 
  * @author jangwee
  *
- *         之前开启一个线程，投递消息。。
+ *      
  *
  */
 
 @SuppressLint("NewApi")
-public class MeasureUmts
+public class MeasureUmts implements Measurable
 {
 
 	private static final String TAG = "MeasureUmtsThread";
 
-	// 成员变量
-	private Handler mHandler = null;
 	private Context mContext = null;
 	// 管理器
 	TelephonyManager telephonyManager = null;
 	// 存储测量信息
 	private static HashMap<String, String> infoHashMap = new HashMap<String, String>();
-
-	// 运营商标识
-	/**
-	 * 中国移动的是 46000 中国联通的是 46001 中国电信的是 46003 460 是 中国
-	 */
-	private String networkOperator[] = { "46000", "46001", "46003" };
-	// 标记本卡运营商归属
-	private int netOperatorMark = -1;
-
-	// 消息
-	private Message msg = null;
-	// 数据 格式 {时间戳 + 测量数据}
-	private Bundle data = new Bundle();
+	
 
 	// 跟LTE相关的API都被@hide了，怎么获得? :) 反射！
 	static Class<?> SS;
@@ -108,7 +82,6 @@ public class MeasureUmts
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -117,97 +90,38 @@ public class MeasureUmts
 	 * @param looper
 	 *            处理该MSG的looper
 	 */
-	public MeasureUmts(Context context, Handler handler)
+	public MeasureUmts(Context context)
 	{
-		this.mHandler = handler;
 		this.mContext = context;
 	}
 
-	// 启动测量，
-	public void initMeasureProc()
+
+	@Override
+	public int IdentifyMeasurable()
 	{
-		
-		GlobalVar.isMeasureUMTSThreadRun = true;
-		
+		return GlobalVar.MSG_HANDLER_MEASURE_UMTS;
+	}
+
+	@Override
+	public HashMap<String, String> MeasureParameters()
+	{
+		return infoHashMap;
+	}
+
+	
+	
+	@Override
+	public void initDevice()
+	{
+		// 设置监听 : 这里有大量信息
 		telephonyManager = (TelephonyManager)mContext 
 				.getSystemService(Context.TELEPHONY_SERVICE);
-		
-		// 设置监听 : 这里有大量信息
+
 		telephonyManager.listen(new MyPhoneStateListener(),
 				PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
 						| PhoneStateListener.LISTEN_SERVICE_STATE);
-		// 获取运营商
-//		getMark();
-		
-		new Thread(new MeasureThread()).start();
 	}
 	
-	//停止测量
-	public void stopMeasureProc()
-	{
-		//估计没什么用
-	}
-
-	// 确定接入运营商
-//	private void getMark()
-//	{
-//		String networkOperatorString = telephonyManager.getNetworkOperator();
-//		for (int i = 0; i < 3; i++)
-//		{
-//			netOperatorMark = -1;
-//			if (networkOperatorString.equals(networkOperator[i]))
-//			{
-//				netOperatorMark = i;
-//				Log.v(TAG, "networkMark + " + netOperatorMark);
-//				break;
-//			}
-//		}
-//	}
-
-	// 投递消息给处理
-	private void sendMeasureData()
-	{
-		// 消息标识
-		msg = mHandler.obtainMessage(GlobalVar.MSG_HANDLER_MEASURE_UMTS);
-		data.clear();
-		data.putLong("timestamp", System.currentTimeMillis());
-		data.putSerializable("data", infoHashMap);
-		msg.setData(data);
-
-		Log.i(TAG, System.currentTimeMillis() + ": " + infoHashMap.toString());
-
-		mHandler.sendMessage(msg);
-	}
-	
-	
-	
-	//测量线程
-	private class MeasureThread implements Runnable
-	{
-		@Override
-		public void run()
-		{
-			// TODO Auto-generated method stub
-			while (GlobalVar.isMeasureUMTSThreadRun)
-			{
-				synchronized (this)
-				{
-					sendMeasureData();
-				}
-				
-				try
-				{
-					Thread.currentThread().sleep(3000);
-				} catch (Exception e)
-				{
-					// TODO: handle exception
-					e.printStackTrace();
-				}
-			}
-				
-		}
-	}
-
 	// 监听器负责更新（观察者模式）
 	private class MyPhoneStateListener extends PhoneStateListener
 	{

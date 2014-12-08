@@ -1087,6 +1087,7 @@ containing a value of this type.
         public static final int beginning=0x7f050011;
         public static final int checkbox=0x7f05002d;
         public static final int collapseActionView=0x7f05000d;
+        public static final int continueBtn=0x7f050044;
         public static final int default_activity_button=0x7f050028;
         public static final int dialog=0x7f05000e;
         public static final int disableHome=0x7f050008;
@@ -1128,8 +1129,8 @@ containing a value of this type.
         public static final int showTitle=0x7f050006;
         public static final int split_action_bar=0x7f05001e;
         public static final int startBtn=0x7f050041;
-        public static final int statuTextView=0x7f050044;
-        public static final int stopBtn=0x7f050043;
+        public static final int statuTextView=0x7f050043;
+        public static final int stopBtn=0x7f050045;
         public static final int submit_area=0x7f050039;
         public static final int tabMode=0x7f050002;
         public static final int title=0x7f05002b;

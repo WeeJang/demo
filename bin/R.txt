@@ -249,6 +249,7 @@ int id always 0x7f05000b
 int id beginning 0x7f050011
 int id checkbox 0x7f05002d
 int id collapseActionView 0x7f05000d
+int id continueBtn 0x7f050044
 int id default_activity_button 0x7f050028
 int id dialog 0x7f05000e
 int id disableHome 0x7f050008
@@ -290,8 +291,8 @@ int id showHome 0x7f050004
 int id showTitle 0x7f050006
 int id split_action_bar 0x7f05001e
 int id startBtn 0x7f050041
-int id statuTextView 0x7f050044
-int id stopBtn 0x7f050043
+int id statuTextView 0x7f050043
+int id stopBtn 0x7f050045
 int id submit_area 0x7f050039
 int id tabMode 0x7f050002
 int id title 0x7f05002b

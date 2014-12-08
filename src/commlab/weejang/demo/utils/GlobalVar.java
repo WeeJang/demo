@@ -18,17 +18,13 @@ public class GlobalVar
 	 */
 	public static boolean isMeasureUMTSThreadRun = false;
 	public static boolean isMeasureUMTSThreadWait = false;
-
 	
-
 	/**
 	 * 控制WiFi测量线程
 	 * 
 	 */
 	public static boolean isMeasureWiFiThreadRun = false;
 	public static boolean isMeasureWiFiThreadWait = false;
-	
-	
 	
 	/**
 	 * 控制WiFi测量线程
@@ -49,5 +45,6 @@ public class GlobalVar
 	public static final int SERVICE_OPERATOR_FLAG_INVALID = -1;//无效的
 	public static final int SERVICE_OPERATOR_FLAG_START = 1; //开始测量
 	public static final int SERVICE_OPERATOR_FLAG_PAUSE = 2;//暂停测量
-	public static final int SERVICE_OPERATOR_FLAG_STOP = 3; //终止测量
+	public static final int SERVICE_OPERATOR_FLAG_CONTIUE =3;//暂停之后继续
+	public static final int SERVICE_OPERATOR_FLAG_STOP = 4; //终止测量
 }

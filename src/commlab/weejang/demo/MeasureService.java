@@ -5,37 +5,19 @@ package commlab.weejang.demo;
  * 其实还有一个思路，就是本地不断在线学习，这个得到后期模型建立出来，进行参数优化的时候做
  */
 
-/**
- * 这里利用SQLite数据库存储本地数据，然后导出
- */
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.text.SimpleDateFormat;
-
-
 import commlab.weejang.demo.db.DBManager;
 import commlab.weejang.demo.db.MeasureData;
-import commlab.weejang.demo.utils.FileUtils;
 import commlab.weejang.demo.utils.GlobalVar;
-import android.R.integer;
-import android.app.IntentService;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Handler.Callback;
 import android.os.IBinder;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class MeasureService extends Service 
@@ -46,8 +28,7 @@ public class MeasureService extends Service
 	//数据库管理类
 	private DBManager dbManager;
 	//测量管理子线程类
-	private MeasureWoker mMeasureWoker;
-		
+	private MeasureDataHandler mMeasureWoker;
 
 	//测量数据处理类
 	private  MeasureHandler measureHandler;
@@ -55,11 +36,11 @@ public class MeasureService extends Service
 	
 
 	// 测量UMTS
-	private  MeasureUmts mMeasureUmts  ;
+	private MeasureWorker mMeasureUMTSWorker  ;
 	// 测量WiFi
-	private  MeasureWiFi mMeasureWiFi  ;
+	private MeasureWorker mMeasureWiFiWorker  ;
 	//测量Traffic
-	private  MeasureTraffic mMeasureTraffic;
+	private  MeasureWorker mMeasureTrafficWorker;
 	
 	
 	//测量信息
@@ -70,12 +51,12 @@ public class MeasureService extends Service
 	{
 		super();
 		
-		mMeasureWoker = new MeasureWoker("MeasureAll");
+		mMeasureWoker = new MeasureDataHandler("MeasureAll");
 		measureHandler = new MeasureHandler(mMeasureWoker.getLooper());
-
-		mMeasureUmts = new MeasureUmts(MeasureService.this, measureHandler);
-		mMeasureWiFi = new MeasureWiFi(MeasureService.this, measureHandler);
-		mMeasureTraffic = new MeasureTraffic(measureHandler);
+		
+		mMeasureUMTSWorker = new MeasureWorker(new MeasureUmts(MeasureService.this), measureHandler);
+		mMeasureWiFiWorker =new MeasureWorker(new MeasureWiFi(MeasureService.this), measureHandler);
+		mMeasureTrafficWorker = new MeasureWorker(new MeasureTraffic(), measureHandler);
 		
 		measureDatas = new ArrayList<MeasureData>(1024);
 		
@@ -86,6 +67,8 @@ public class MeasureService extends Service
 	{
 		super.onCreate();
 		dbManager = new DBManager(this);
+		//清除表已存在
+		dbManager.initDBManager();
 	}
 	
 	/**
@@ -100,13 +83,19 @@ public class MeasureService extends Service
 		{
 		case GlobalVar.SERVICE_OPERATOR_FLAG_START:
 				Log.i(TAG,"receive OPF:  start" );
+				initMeasure();
 				startMeasure();
 			break;
 		case GlobalVar.SERVICE_OPERATOR_FLAG_PAUSE:
 				pauseMeasure();
 				Log.i(TAG,"receive OPF:  pause" );
 			break;
-			
+		
+		case GlobalVar.SERVICE_OPERATOR_FLAG_CONTIUE:
+				continueMeasure();
+				Log.i(TAG,"receive OPF:  continue" );
+				break;
+		
 		case GlobalVar.SERVICE_OPERATOR_FLAG_STOP:
 				stopMeasure();
 				this.stopSelf();
@@ -129,6 +118,70 @@ public class MeasureService extends Service
 		dbManager.closeDB();
 	}
 			
+
+		
+		//初始化测量
+		private void initMeasure()
+		{
+			mMeasureUMTSWorker.initMeasureProc();
+			mMeasureWiFiWorker.initMeasureProc();
+			mMeasureTrafficWorker.initMeasureProc();
+		}
+		
+		//开始测量
+		private void startMeasure()
+		{
+			mMeasureUMTSWorker.startMeasureProc();
+			mMeasureWiFiWorker.startMeasureProc();
+			mMeasureTrafficWorker.startMeasureProc();
+		}
+		
+		//暂停测量
+		private void pauseMeasure()
+		{
+			
+			mMeasureUMTSWorker.pauseMeasureProc();
+			mMeasureWiFiWorker.pauseMeasureProc();	
+			mMeasureTrafficWorker.pauseMeasureProc();
+			
+			//从列表写入数据库
+			if (measureDatas.size() > 0)
+			{
+				dbManager.add(measureDatas);
+				measureDatas.clear();
+			}
+		}
+		
+		//重启测量
+		private void continueMeasure()
+		{
+			mMeasureUMTSWorker.continueMeasureProc();
+			mMeasureWiFiWorker.continueMeasureProc();
+			mMeasureTrafficWorker.continueMeasureProc();
+		}
+		
+		//终止测量
+		private void stopMeasure()
+		{
+			mMeasureUMTSWorker.stopMeasureProc();
+			mMeasureWiFiWorker.stopMeasureProc();
+			mMeasureTrafficWorker.stopMeasureProc();
+		
+			//写入数据库
+			if (measureDatas.size() > 0)
+			{
+				dbManager.add(measureDatas);
+				measureDatas.clear();
+			}			
+		}
+
+		@Override
+		public IBinder onBind(Intent intent)
+		{
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 		
 		//MeasureHandler 负责处理收到的测量数据消息
 		private class MeasureHandler  extends Handler
@@ -183,53 +236,6 @@ public class MeasureService extends Service
 				}
 			}
 		}
-		
-		
-		//开始测量
-		private void startMeasure()
-		{
-			// TODO Auto-generated method stub
-			// 开启UMTS测量
-			mMeasureUmts.initMeasureProc();
-			//开启WiFi测量
-			mMeasureWiFi.initMeasureProc();
-			//开启Traffic测量
-			mMeasureTraffic.initMeasureProc();
-		}
-		
-		//暂停测量
-		private void pauseMeasure()
-		{
-			// TODO Auto-generated method stub			
-			
-			//从列表写入数据库
-			if (measureDatas.size() > 0)
-			{
-				dbManager.add(measureDatas);
-				measureDatas.clear();
-			}
-		}
-		
-		
-		//终止测量
-		private void stopMeasure()
-		{
-			
-			//写入数据库
-			if (measureDatas.size() > 0)
-			{
-				dbManager.add(measureDatas);
-				measureDatas.clear();
-			}
-		}
-
-		@Override
-		public IBinder onBind(Intent intent)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
-
 }
 
 

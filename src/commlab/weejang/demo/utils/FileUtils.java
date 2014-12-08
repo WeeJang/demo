@@ -11,7 +11,7 @@ import android.os.Environment;
 import android.text.InputFilter.LengthFilter;
 
 /**
- * 工具类，用于对SD卡的操作
+ * 工具类，用于对SD卡的操作 暂时没用
  * @author jangwee
  *
  */

@@ -8,7 +8,7 @@ import android.os.Looper;
  *
  */
 
-public class MeasureWoker implements Runnable
+public class MeasureDataHandler implements Runnable
 {
 
 	private final Object mLock = new Object();
@@ -20,7 +20,7 @@ public class MeasureWoker implements Runnable
 	 * create measuer thread with the given name.
 	 */
 		
-	public  MeasureWoker(String name)
+	public  MeasureDataHandler(String name)
 	{
 		Thread t = new Thread(null,this,name);
 		t.setPriority(Thread.MIN_PRIORITY);

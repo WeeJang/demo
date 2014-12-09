@@ -15,19 +15,19 @@ import android.net.wifi.WifiManager;
  * @author jangwee
  *
  */
-public class MeasureWiFi implements Measurable
+public class WiFiInfo implements Measurable
 {
 
 	private Context mContext;
 	// 管理器
-	WifiManager wifiManager;
+	private WifiManager mWifiManager;
 	// 相关信息类
-	WifiInfo wifiInfo;
+	private WifiInfo mWifiInfo;
 
 	// 数据存储
 	HashMap<String, String> infoHashMap = new HashMap<String, String>();
 
-	public MeasureWiFi(Context context)
+	public WiFiInfo(Context context)
 	{
 		this.mContext = context;
 	}
@@ -35,7 +35,7 @@ public class MeasureWiFi implements Measurable
 	@Override
 	public void initDevice()
 	{
-	wifiManager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
+	mWifiManager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);
 	}
 	
 	@Override
@@ -48,23 +48,23 @@ public class MeasureWiFi implements Measurable
 	@Override
 	public HashMap<String, String> MeasureParameters()
 	{
-		if (wifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED)
+		if (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED)
 		{
-			wifiInfo = wifiManager.getConnectionInfo();
+			mWifiInfo = mWifiManager.getConnectionInfo();
 
 			infoHashMap.clear();
-			infoHashMap.put("SSID", wifiInfo.getSSID());
-			infoHashMap.put("BSSID", wifiInfo.getBSSID());
-			infoHashMap.put("MAC", wifiInfo.getMacAddress());
+			infoHashMap.put("SSID", mWifiInfo.getSSID());
+			infoHashMap.put("BSSID", mWifiInfo.getBSSID());
+			infoHashMap.put("MAC", mWifiInfo.getMacAddress());
 			infoHashMap.put("HiddenSSID",
-					String.valueOf(wifiInfo.getHiddenSSID()));
+					String.valueOf(mWifiInfo.getHiddenSSID()));
 			infoHashMap.put("IP",
-					String.valueOf(wifiInfo.getIpAddress()));
+					String.valueOf(mWifiInfo.getIpAddress()));
 			infoHashMap.put("LinkSpeed",
-					String.valueOf(wifiInfo.getLinkSpeed()));
-			infoHashMap.put("RSSI", String.valueOf(wifiInfo.getRssi()));
+					String.valueOf(mWifiInfo.getLinkSpeed()));
+			infoHashMap.put("RSSI", String.valueOf(mWifiInfo.getRssi()));
 			infoHashMap.put("NetWorkID",
-					String.valueOf(wifiInfo.getNetworkId()));
+					String.valueOf(mWifiInfo.getNetworkId()));
 		}
 		return infoHashMap;
 	}

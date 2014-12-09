@@ -26,12 +26,12 @@ public class MeasureService extends Service
 	private static final String TAG = "NoteService";
 	
 	//数据库管理类
-	private DBManager dbManager;
+	private DBManager mDbManager;
 	//测量管理子线程类
-	private MeasureDataHandler mMeasureWoker;
+	private MeasureDataWorker mMeasureWoker;
 
 	//测量数据处理类
-	private  MeasureHandler measureHandler;
+	private  MeasureHandler mMeasureHandler;
 	
 	
 
@@ -44,31 +44,40 @@ public class MeasureService extends Service
 	
 	
 	//测量信息
-	private List<MeasureData> measureDatas ;
+	private List<MeasureData> mMeasureDataList ;
 	
 	
 	public MeasureService()
 	{
 		super();
 		
-		mMeasureWoker = new MeasureDataHandler("MeasureAll");
-		measureHandler = new MeasureHandler(mMeasureWoker.getLooper());
+		mMeasureWoker = new MeasureDataWorker("MeasureAll");
+		mMeasureHandler = new MeasureHandler(mMeasureWoker.getLooper());
 		
-		mMeasureUMTSWorker = new MeasureWorker(new MeasureUmts(MeasureService.this), measureHandler);
-		mMeasureWiFiWorker =new MeasureWorker(new MeasureWiFi(MeasureService.this), measureHandler);
-		mMeasureTrafficWorker = new MeasureWorker(new MeasureTraffic(), measureHandler);
+		mMeasureUMTSWorker = new MeasureWorker(new UmtsInfo(MeasureService.this), mMeasureHandler);
+		mMeasureWiFiWorker =new MeasureWorker(new WiFiInfo(MeasureService.this), mMeasureHandler);
+		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(), mMeasureHandler);
 		
-		measureDatas = new ArrayList<MeasureData>(1024);
+		mMeasureDataList = new ArrayList<MeasureData>(1024);
 		
 	}
 		
+	
+
+	@Override
+	public IBinder onBind(Intent intent)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		dbManager = new DBManager(this);
+		mDbManager = new DBManager(this);
 		//清除表已存在
-		dbManager.initDBManager();
+		mDbManager.initDBManager();
 	}
 	
 	/**
@@ -115,7 +124,7 @@ public class MeasureService extends Service
 	public void onDestroy()
 	{
 		super.onDestroy();
-		dbManager.closeDB();
+		mDbManager.closeDB();
 	}
 			
 
@@ -145,10 +154,10 @@ public class MeasureService extends Service
 			mMeasureTrafficWorker.pauseMeasureProc();
 			
 			//从列表写入数据库
-			if (measureDatas.size() > 0)
+			if (mMeasureDataList.size() > 0)
 			{
-				dbManager.add(measureDatas);
-				measureDatas.clear();
+				mDbManager.add(mMeasureDataList);
+				mMeasureDataList.clear();
 			}
 		}
 		
@@ -168,19 +177,13 @@ public class MeasureService extends Service
 			mMeasureTrafficWorker.stopMeasureProc();
 		
 			//写入数据库
-			if (measureDatas.size() > 0)
+			if (mMeasureDataList.size() > 0)
 			{
-				dbManager.add(measureDatas);
-				measureDatas.clear();
+				mDbManager.add(mMeasureDataList);
+				mMeasureDataList.clear();
 			}			
 		}
 
-		@Override
-		public IBinder onBind(Intent intent)
-		{
-			// TODO Auto-generated method stub
-			return null;
-		}
 
 		
 		//MeasureHandler 负责处理收到的测量数据消息
@@ -207,26 +210,26 @@ public class MeasureService extends Service
 				HashMap<String, String> mData = (HashMap<String, String>) data
 						.getSerializable("data");
 				
-				if (measureDatas == null)
+				if (mMeasureDataList == null)
 					return ;
 				switch (msg.what)
 				{
 				// 处理UMTS
 				case GlobalVar.MSG_HANDLER_MEASURE_UMTS:
-					measureDatas.add(new MeasureData(timeStamp, "umts", mData.toString()));
+					mMeasureDataList.add(new MeasureData(timeStamp, "umts", mData.toString()));
 					
 					Log.i(TAG,"receive umts data: " + mData.toString());
 					
 					break;
 				// 处理WiFi
 				case GlobalVar.MSG_HANDLER_MEASURE_WIFI:
-					measureDatas.add(new MeasureData(timeStamp, "wifi", mData.toString()));
+					mMeasureDataList.add(new MeasureData(timeStamp, "wifi", mData.toString()));
 					
 					Log.i(TAG,"receive wifi data: " + mData.toString());
 					
 					break;
 				case GlobalVar.MSG_HANDLER_MEASURE_TRAFFIC:
-					measureDatas.add(new MeasureData(timeStamp, "traffic", mData.toString()));
+					mMeasureDataList.add(new MeasureData(timeStamp, "traffic", mData.toString()));
 					
 					Log.i(TAG,"receive traffic data: " + mData.toString());
 					

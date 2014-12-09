@@ -12,7 +12,7 @@ import android.net.TrafficStats;
  * @author jangwee
  *
  */
-public class MeasureTraffic implements Measurable
+public class TrafficInfo implements Measurable
 {
 	
 	private static HashMap<String, String> infoMap = new HashMap<String,String>(6);

@@ -8,19 +8,17 @@ import android.os.Looper;
  *
  */
 
-public class MeasureDataHandler implements Runnable
+public class MeasureDataWorker implements Runnable
 {
 
 	private final Object mLock = new Object();
 	private Looper mLooper;
 	
-	
-	
 	/**
 	 * create measuer thread with the given name.
 	 */
 		
-	public  MeasureDataHandler(String name)
+	public  MeasureDataWorker(String name)
 	{
 		Thread t = new Thread(null,this,name);
 		t.setPriority(Thread.MIN_PRIORITY);

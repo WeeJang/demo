@@ -26,16 +26,16 @@ import android.util.Log;
  */
 
 @SuppressLint("NewApi")
-public class MeasureUmts implements Measurable
+public class UmtsInfo implements Measurable
 {
 
 	private static final String TAG = "MeasureUmtsThread";
 
 	private Context mContext = null;
 	// 管理器
-	TelephonyManager telephonyManager = null;
+	private TelephonyManager mTelephonyManager = null;
 	// 存储测量信息
-	private static HashMap<String, String> infoHashMap = new HashMap<String, String>();
+	private static HashMap<String, String> mInfoMap = new HashMap<String, String>();
 	
 
 	// 跟LTE相关的API都被@hide了，怎么获得? :) 反射！
@@ -90,7 +90,7 @@ public class MeasureUmts implements Measurable
 	 * @param looper
 	 *            处理该MSG的looper
 	 */
-	public MeasureUmts(Context context)
+	public UmtsInfo(Context context)
 	{
 		this.mContext = context;
 	}
@@ -105,7 +105,7 @@ public class MeasureUmts implements Measurable
 	@Override
 	public HashMap<String, String> MeasureParameters()
 	{
-		return infoHashMap;
+		return mInfoMap;
 	}
 
 	
@@ -114,10 +114,10 @@ public class MeasureUmts implements Measurable
 	public void initDevice()
 	{
 		// 设置监听 : 这里有大量信息
-		telephonyManager = (TelephonyManager)mContext 
+		mTelephonyManager = (TelephonyManager)mContext 
 				.getSystemService(Context.TELEPHONY_SERVICE);
 
-		telephonyManager.listen(new MyPhoneStateListener(),
+		mTelephonyManager.listen(new MyPhoneStateListener(),
 				PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
 						| PhoneStateListener.LISTEN_SERVICE_STATE);
 	}
@@ -218,36 +218,36 @@ public class MeasureUmts implements Measurable
 			
 			synchronized (this)
 			{
-				infoHashMap.clear();
-				infoHashMap.put("mGsmSignalStrength",
+				mInfoMap.clear();
+				mInfoMap.put("mGsmSignalStrength",
 						String.valueOf(signalStrength.getGsmSignalStrength()));
-				infoHashMap.put("mGsmBitErrorRate",
+				mInfoMap.put("mGsmBitErrorRate",
 						String.valueOf(signalStrength.getGsmBitErrorRate()));
-				infoHashMap.put("mCdmaDbm",
+				mInfoMap.put("mCdmaDbm",
 						String.valueOf(signalStrength.getCdmaDbm()));
-				infoHashMap.put("mCdmaEcio",
+				mInfoMap.put("mCdmaEcio",
 						String.valueOf(signalStrength.getCdmaEcio()));
-				infoHashMap.put("mEvdoDbm",
+				mInfoMap.put("mEvdoDbm",
 						String.valueOf(signalStrength.getEvdoDbm()));
-				infoHashMap.put("mEvdoEcio",
+				mInfoMap.put("mEvdoEcio",
 						String.valueOf(signalStrength.getEvdoEcio()));
-				infoHashMap.put("mEvdoSnr",
+				mInfoMap.put("mEvdoSnr",
 						String.valueOf(signalStrength.getEvdoSnr()));
-				infoHashMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
+				mInfoMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
 
-				// infoHashMap.put("mLteSignalStrength",
+				// mInfoMap.put("mLteSignalStrength",
 				// String.valueOf(signalStrength.getLteSignalStrength()));
 				// 反射获取
 
 				try
 				{
-					infoHashMap.put("mLteSignalStrength", String
+					mInfoMap.put("mLteSignalStrength", String
 							.valueOf(lteSignalStrengthField.get(signalStrength)));
-					infoHashMap.put("mLteRsrp",
+					mInfoMap.put("mLteRsrp",
 							String.valueOf(lteRsrpField.get(signalStrength)));
-					infoHashMap.put("mLteRsrq",
+					mInfoMap.put("mLteRsrq",
 							String.valueOf(lteRsrqField.get(signalStrength)));
-					infoHashMap.put("mLteCqi",
+					mInfoMap.put("mLteCqi",
 							String.valueOf(lteCqiField.get(signalStrength)));
 				} catch (IllegalAccessException e)
 				{

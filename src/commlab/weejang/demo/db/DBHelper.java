@@ -12,6 +12,7 @@ import commlab.weejang.demo.utils.GlobalVar;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DBHelper extends SQLiteOpenHelper
 {
@@ -34,6 +35,7 @@ public class DBHelper extends SQLiteOpenHelper
 	{
 		//db.execSQL("DROP TABLE IF EXISTS " + GlobalVar.dbTableName);
 		// TODO Auto-generated method stub
+		Log.i("SQlite3 onCreate", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		db.execSQL("CREATE TABLE IF NOT EXISTS "+GlobalVar.dbTableName +
 								"(_id INTEGER PRIMARY KEY AUTOINCREMENT,time_stamp VARCHAR,data_type VARCHAR,data_info TEXT)");
 		

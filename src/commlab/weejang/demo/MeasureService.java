@@ -58,8 +58,8 @@ public class MeasureService extends Service
 	
 	
 	
-	//测量信息
-	private List<MeasureData> mMeasureDataList ;
+	//测量信息 直接写入数据库，不再设立缓冲区
+	//private List<MeasureData> mMeasureDataList ;
 	
 	
 	static{
@@ -75,7 +75,9 @@ public class MeasureService extends Service
 				throws RemoteException
 		{
 			Log.i("IPC MSG", clientMessage.dataInfo);
-			mMeasureDataList.add(clientMessage);
+			//数据库开放一个直接写入的接口,为IPC
+			//mMeasureDataList.add(clientMessage);
+			mDbManager.add(clientMessage);
 		}
 	};
 	
@@ -92,7 +94,7 @@ public class MeasureService extends Service
 		mMeasureWiFiWorker =new MeasureWorker(new WiFiInfo(MeasureService.this), mMeasureHandler);
 		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(), mMeasureHandler);
 		
-		mMeasureDataList = new ArrayList<MeasureData>(64);
+		//mMeasureDataList = new ArrayList<MeasureData>(64);
 	}
 		
 
@@ -190,12 +192,12 @@ public class MeasureService extends Service
 			mMeasureWiFiWorker.pauseMeasureProc();	
 			mMeasureTrafficWorker.pauseMeasureProc();
 			
-			//从列表写入数据库
-			if (mMeasureDataList.size() > 0)
-			{
-				mDbManager.add(mMeasureDataList);
-				mMeasureDataList.clear();
-			}
+//			//从列表写入数据库
+//			if (mMeasureDataList.size() > 0)
+//			{
+//				mDbManager.add(mMeasureDataList);
+//				mMeasureDataList.clear();
+//			}
 		}
 		
 		//重启测量
@@ -213,12 +215,12 @@ public class MeasureService extends Service
 			mMeasureWiFiWorker.stopMeasureProc();
 			mMeasureTrafficWorker.stopMeasureProc();
 		
-			//写入数据库
-			if (mMeasureDataList.size() > 0)
-			{
-				mDbManager.add(mMeasureDataList);
-				mMeasureDataList.clear();
-			}			
+//			//写入数据库
+//			if (mMeasureDataList.size() > 0)
+//			{
+//				mDbManager.add(mMeasureDataList);
+//				mMeasureDataList.clear();
+//			}			
 		}
 
 
@@ -237,12 +239,12 @@ public class MeasureService extends Service
 				// data 格式 统一 ： timestamp + flag(omit) + datadetai
 				
 				//先判断临时存储区是否已经满
-				if (mMeasureDataList.size() > 60)
-				{
-					//写入数据库
-					mDbManager.add(mMeasureDataList);
-					mMeasureDataList.clear();
-				}
+//				if (mMeasureDataList.size() > 60)
+//				{
+//					//写入数据库
+//					mDbManager.add(mMeasureDataList);
+//					mMeasureDataList.clear();
+//				}
 				
 				Bundle data = msg.getData();
 					
@@ -256,27 +258,30 @@ public class MeasureService extends Service
 				HashMap<String, String> mData = (HashMap<String, String>) data
 						.getSerializable("data");
 				
-				if (mMeasureDataList == null)
-					return ;
+//				if (mMeasureDataList == null)
+//					return ;
 				switch (msg.what)
 				{
 				// 处理UMTS
 				case GlobalVar.MSG_HANDLER_MEASURE_UMTS:
-					mMeasureDataList.add(new MeasureData(timeStamp, "umts", mData.toString()));
-					
+					//mMeasureDataList.add(new MeasureData(timeStamp, "umts", mData.toString()));
+					mDbManager.add(new MeasureData(timeStamp, "umts", mData.toString()));
 					
 					Log.i(TAG,"receive umts data: " + mData.toString());
 					
 					break;
 				// 处理WiFi
 				case GlobalVar.MSG_HANDLER_MEASURE_WIFI:
-					mMeasureDataList.add(new MeasureData(timeStamp, "wifi", mData.toString()));
+					//mMeasureDataList.add(new MeasureData(timeStamp, "wifi", mData.toString()));
+					mDbManager.add(new MeasureData(timeStamp, "wifi", mData.toString()));
 					
 					Log.i(TAG,"receive wifi data: " + mData.toString());
 					
 					break;
 				case GlobalVar.MSG_HANDLER_MEASURE_TRAFFIC:
-					mMeasureDataList.add(new MeasureData(timeStamp, "traffic", mData.toString()));
+					//mMeasureDataList.add(new MeasureData(timeStamp, "traffic", mData.toString()));
+					mDbManager.add(new MeasureData(timeStamp, "traffic", mData.toString()));
+					
 					
 					Log.i(TAG,"receive traffic data: " + mData.toString());
 					

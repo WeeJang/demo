@@ -36,7 +36,20 @@ public class DBManager
 	
 	
 	/**
-	 * add meausreData
+	 * add measureData单个元素
+	 */
+	public void add(MeasureData measureData)
+	{
+		db.execSQL("INSERT INTO "+ GlobalVar.dbTableName + " VALUES(null,?,?,?)",
+								new Object[]{measureData.timeStamp,measureData.dataType,measureData.dataInfo});
+	}
+	
+	
+	
+	
+	
+	/**
+	 * add meausreData 多个元素
 	 * @param 
 	 */
 	public void add (List<MeasureData> measureDatas)
@@ -76,7 +89,7 @@ public class DBManager
 	
 	private void updateTable(String tableName)
 	{
-		db.execSQL("DROP TABLE IF EXISTS " + tableName);
+//		db.execSQL("DROP TABLE IF EXISTS " + tableName);
 		db.execSQL("CREATE TABLE IF NOT EXISTS "+ tableName +
 				"(_id INTEGER PRIMARY KEY AUTOINCREMENT,time_stamp VARCHAR,data_type VARCHAR,data_info TEXT)");
 	}

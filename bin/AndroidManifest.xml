@@ -23,7 +23,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
- <!-- 
+ 
         <activity
             android:name=".MainActivity">
             <intent-filter>
@@ -31,8 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
--->
-
+       
 		<receiver 
 	    	android:name="commlab.weejang.demo.BootBroadcastReceiver">
 	    	<intent-filter >
@@ -40,14 +39,14 @@
 	    	</intent-filter>	    
 		</receiver>
 
-	     <service
-            android:enabled="true"
-            android:name=".MeasureService"
-            android:exported="true"
-            >
-            <intent-filter >
-                <action android:name="commlab.weejang.demo.MeasureService"/>
-            </intent-filter>
+	    <service
+           android:enabled="true"
+           android:name=".MeasureService"
+           android:exported="true"
+           >
+           <intent-filter >
+               <action android:name="commlab.weejang.demo.MeasureService"/>
+           </intent-filter>
         </service>
     
         

@@ -1,5 +1,10 @@
 package commlab.weejang.demo;
 
+/**
+ * 开机自动激活服务
+ * @author jangwee
+ */
+
 import android.app.Notification.Action;
 import android.content.BroadcastReceiver;
 import android.content.Context;

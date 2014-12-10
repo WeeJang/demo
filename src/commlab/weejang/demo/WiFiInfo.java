@@ -10,7 +10,7 @@ import android.net.wifi.WifiManager;
 
 
 /**
- * 测量WiFi,没有监听器，开一个线程，定时投放
+ * WiFi测量
  * 
  * @author jangwee
  *

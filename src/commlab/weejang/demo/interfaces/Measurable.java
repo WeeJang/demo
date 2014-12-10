@@ -1,5 +1,10 @@
 package commlab.weejang.demo.interfaces;
 
+/**
+ * @author jangwee 
+ * 定义可测量的接口
+ */
+
 import java.util.HashMap;
 
 

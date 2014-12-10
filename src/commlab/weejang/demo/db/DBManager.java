@@ -10,7 +10,7 @@ import android.util.Log;
 /**
  * @author jangwee
  * 
- * DBManager 封装所有的业务和方法
+ * 封装所有的业务和方法
  */
 public class DBManager
 {
@@ -47,17 +47,13 @@ public class DBManager
 		try
 		{
 			for (MeasureData measureData : measureDatas)
-			{
-//				db.execSQL("INSERT INTO " +GlobalVar.dbTableName+"(time_stamp,data_type,data_info)" + " VALUES(?,?,?)", 
-//										new Object[]{measureData.timeStamp,measureData.dataType,measureData.dataInfo});
-				
+			{				
 				db.execSQL("INSERT INTO " +GlobalVar.dbTableName + " VALUES(null,?,?,?)", 
 						new Object[]{measureData.timeStamp,measureData.dataType,measureData.dataInfo});
 				
 				Log.i(TAG, String.valueOf(measureData.timeStamp) +measureData.dataType + measureData.dataInfo);
 			}
-			//设置事务完成
-			
+			//设置事务完成		
 			db.setTransactionSuccessful();
 			Log.i(TAG,"insert finish");
 		} catch (Exception e)

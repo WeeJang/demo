@@ -12,8 +12,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * 
- * @author jangwee UI
+ * 前期辅助UI
+ * @author jangwee
  */
 
 public class MainActivity extends Activity implements View.OnClickListener

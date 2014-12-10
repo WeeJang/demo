@@ -1,11 +1,15 @@
 package commlab.weejang.demo;
 
 /**
+ * 测量主服务 全局 单独进程
  * 后台记录服务，后期将所有DataStream定向到这里，然后记录到本地，最终定时上传到服务器，服务器汇总
  * 其实还有一个思路，就是本地不断在线学习，这个得到后期模型建立出来，进行参数优化的时候做
+ * @author jangwee 
  */
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,7 +56,8 @@ public class MeasureService extends Service
 	//测量信息
 	private List<MeasureData> mMeasureDataList ;
 	
-	
+	//日期格式化
+	private static SimpleDateFormat mFormater = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
 	
 	//实现Remote 接口
 	private final IMeasureService.Stub mBinder = new IMeasureService.Stub()
@@ -80,8 +85,7 @@ public class MeasureService extends Service
 		mMeasureWiFiWorker =new MeasureWorker(new WiFiInfo(MeasureService.this), mMeasureHandler);
 		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(), mMeasureHandler);
 		
-		mMeasureDataList = new ArrayList<MeasureData>(1024);
-		
+		mMeasureDataList = new ArrayList<MeasureData>(1024);		
 	}
 		
 
@@ -95,6 +99,9 @@ public class MeasureService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+		
+		//更新表
+		GlobalVar.dbTableName = mFormater.format(new Date());
 		mDbManager = new DBManager(this);
 		//清除表已存在
 		mDbManager.initDBManager();

@@ -6,8 +6,7 @@ import commlab.weejang.demo.interfaces.Measurable;
 import commlab.weejang.demo.utils.GlobalVar;
 import android.net.TrafficStats;
 /**
- * 统计流量，监控某一进程，获取流量信息。
- * 思路 ： 先扫描获取手机中的浏览器，获得对应的启动进程的PID，然后进行流量检测，可以达到测网速的目的
+ * 流量测量
  *
  * @author jangwee
  *

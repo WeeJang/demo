@@ -3,7 +3,7 @@ package commlab.weejang.demo.db;
 
 /**
  * @author jangwee 
- * @ DBHelper 维护和管理数据库的基类
+ *  维护和管理数据库的基类
  * 
  * 
  */

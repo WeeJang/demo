@@ -1,5 +1,11 @@
 package commlab.weejang.demo.utils;
 
+/*
+ * 定义全局变量
+ * 包括 
+ *   消息协议，标识
+ */
+
 public class GlobalVar
 {
 

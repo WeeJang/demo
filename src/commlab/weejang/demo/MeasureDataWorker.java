@@ -4,6 +4,7 @@ import android.os.Looper;
 
 /**
  * 参考MediaPlaybackActivity.java
+ *  维护测量消息队列
  * @author jangwee
  *
  */

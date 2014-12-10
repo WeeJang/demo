@@ -1,11 +1,18 @@
 package commlab.weejang.demo;
 
+/**
+ * 测量线程类，驱动测量
+ * @author jangwee
+ * 
+ */
+
 import java.util.HashMap;
 
 import commlab.weejang.demo.interfaces.Measurable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+
 
 public class MeasureWorker implements Runnable
 {

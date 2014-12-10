@@ -18,7 +18,7 @@ import android.util.Log;
 
 /**
  *
- * 
+ * UMTS测量
  * @author jangwee
  *
  *      

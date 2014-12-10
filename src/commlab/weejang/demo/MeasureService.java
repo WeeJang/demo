@@ -19,13 +19,17 @@ import commlab.weejang.demo.db.DBManager;
 import commlab.weejang.demo.db.MeasureData;
 import commlab.weejang.demo.utils.GlobalVar;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.location.SettingInjectorService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class MeasureService extends Service 
@@ -53,11 +57,14 @@ public class MeasureService extends Service
 	private  MeasureWorker mMeasureTrafficWorker;
 	
 	
+	
 	//测量信息
 	private List<MeasureData> mMeasureDataList ;
 	
-	//日期格式化
-	private static SimpleDateFormat mFormater = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+	
+	static{
+		
+	}
 	
 	//实现Remote 接口
 	private final IMeasureService.Stub mBinder = new IMeasureService.Stub()
@@ -85,7 +92,7 @@ public class MeasureService extends Service
 		mMeasureWiFiWorker =new MeasureWorker(new WiFiInfo(MeasureService.this), mMeasureHandler);
 		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(), mMeasureHandler);
 		
-		mMeasureDataList = new ArrayList<MeasureData>(1024);		
+		mMeasureDataList = new ArrayList<MeasureData>(64);
 	}
 		
 
@@ -100,9 +107,13 @@ public class MeasureService extends Service
 	{
 		super.onCreate();
 		
-		//更新表
-		GlobalVar.dbTableName = mFormater.format(new Date());
+		//创建日志表名
+		TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+		GlobalVar.dbTableName = "commlab_" +tm.getDeviceId()+"_"+ new SimpleDateFormat("yyyyMMdd").format(new Date());
+		
 		mDbManager = new DBManager(this);
+		//
+		//GlobalVar.dbTableName = mFormater.format(new Date());
 		//清除表已存在
 		mDbManager.initDBManager();
 	}
@@ -122,6 +133,7 @@ public class MeasureService extends Service
 				initMeasure();
 				startMeasure();
 			break;
+			
 		case GlobalVar.SERVICE_OPERATOR_FLAG_PAUSE:
 				pauseMeasure();
 				Log.i(TAG,"receive OPF:  pause" );
@@ -223,6 +235,15 @@ public class MeasureService extends Service
 			public void handleMessage(Message msg)
 			{
 				// data 格式 统一 ： timestamp + flag(omit) + datadetai
+				
+				//先判断临时存储区是否已经满
+				if (mMeasureDataList.size() > 60)
+				{
+					//写入数据库
+					mDbManager.add(mMeasureDataList);
+					mMeasureDataList.clear();
+				}
+				
 				Bundle data = msg.getData();
 					
 				if (data == null)
@@ -242,6 +263,7 @@ public class MeasureService extends Service
 				// 处理UMTS
 				case GlobalVar.MSG_HANDLER_MEASURE_UMTS:
 					mMeasureDataList.add(new MeasureData(timeStamp, "umts", mData.toString()));
+					
 					
 					Log.i(TAG,"receive umts data: " + mData.toString());
 					

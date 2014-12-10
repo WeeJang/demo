@@ -2,6 +2,9 @@ package commlab.weejang.demo;
 
 
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import commlab.weejang.demo.utils.GlobalVar;
 import android.app.Activity;
 import android.content.Intent;
@@ -35,6 +38,8 @@ public class MainActivity extends Activity implements View.OnClickListener
 	Button stopBtn;
 	TextView statuTView;
 	
+	
+	
 	// 在完整生存期时开始调用
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -61,6 +66,14 @@ public class MainActivity extends Activity implements View.OnClickListener
 		pauseBtn.setOnClickListener(this);
 		continusBtn.setOnClickListener(this);
 		stopBtn.setOnClickListener(this);
+		
+		startBtn.setEnabled(true);
+		pauseBtn.setEnabled(false);
+		continusBtn.setEnabled(false);
+		stopBtn.setEnabled(false);
+		
+		
+		
 
 	}
 		
@@ -76,6 +89,11 @@ public class MainActivity extends Activity implements View.OnClickListener
 			case R.id.startBtn:
 					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_START;
 					statuTView.setText("started");
+					
+					startBtn.setEnabled(false);
+					continusBtn.setEnabled(false);
+					pauseBtn.setEnabled(true);
+					stopBtn.setEnabled(true);
 					Log.i(TAG, "startBtn");
 					
 				break;
@@ -83,6 +101,13 @@ public class MainActivity extends Activity implements View.OnClickListener
 			case R.id.pauseBtn:
 					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_PAUSE;
 					statuTView.setText("paused");
+						
+					pauseBtn.setEnabled(false);
+					continusBtn.setEnabled(true);
+					stopBtn.setEnabled(false);	
+					startBtn.setEnabled(false);
+					
+					
 					Log.i(TAG, "pauseBtn");
 				break;
 			//重启测量
@@ -90,12 +115,26 @@ public class MainActivity extends Activity implements View.OnClickListener
 			case R.id.continueBtn:
 					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_CONTIUE;
 					statuTView.setText("continued");
+					
+					startBtn.setEnabled(false);
+					pauseBtn.setEnabled(true);
+					continusBtn.setEnabled(false);
+					stopBtn.setEnabled(true);
+					
+					
 					Log.i(TAG, "continueBtn");
 					break;
 			//终止测量
 			case R.id.stopBtn:
 					//终止服务
 				 	operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_STOP;
+				 	
+				 	startBtn.setEnabled(true);
+				 	pauseBtn.setEnabled(false);
+				 	continusBtn.setEnabled(false);
+				 	stopBtn.setEnabled(false);
+				 	
+				 	
 				 	statuTView.setText("stoped");
 				 	Log.i(TAG, "stopBtn");
 				 break;

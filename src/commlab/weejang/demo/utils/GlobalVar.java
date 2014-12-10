@@ -45,6 +45,11 @@ public class GlobalVar
 	public static String dbTableName = "measure_data";
 	
 	/**
+	 * 设备ID
+	 */
+	public static String deviceId ="android";
+	
+	/**
 	 * 跟测量服务相关的标识
 	 * 
 	 */

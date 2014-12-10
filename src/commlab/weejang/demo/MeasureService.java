@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import commlab.weejang.demo.aidl.ClientMessage;
+import commlab.weejang.demo.aidl.IMeasureService;
 import commlab.weejang.demo.db.DBManager;
 import commlab.weejang.demo.db.MeasureData;
 import commlab.weejang.demo.utils.GlobalVar;
@@ -19,12 +21,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 public class MeasureService extends Service 
 {
 
 	private static final String TAG = "NoteService";
+	
+
 	
 	//数据库管理类
 	private DBManager mDbManager;
@@ -48,6 +53,22 @@ public class MeasureService extends Service
 	private List<MeasureData> mMeasureDataList ;
 	
 	
+	
+	//实现Remote 接口
+	private final IMeasureService.Stub mBinder = new IMeasureService.Stub()
+	{
+		
+		@Override
+		public void collectClientMessage(int pid, ClientMessage clientMessage)
+				throws RemoteException
+		{
+			Log.i("IPC MSG", clientMessage.dataInfo);
+			mMeasureDataList.add(clientMessage);
+		}
+	};
+	
+	
+	
 	public MeasureService()
 	{
 		super();
@@ -63,13 +84,11 @@ public class MeasureService extends Service
 		
 	}
 		
-	
 
 	@Override
 	public IBinder onBind(Intent intent)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return mBinder;
 	}
 	
 	@Override
@@ -128,8 +147,6 @@ public class MeasureService extends Service
 		mDbManager.closeDB();
 	}
 			
-
-		
 		//初始化测量
 		private void initMeasure()
 		{

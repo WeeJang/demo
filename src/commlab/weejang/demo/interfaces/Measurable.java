@@ -2,9 +2,7 @@ package commlab.weejang.demo.interfaces;
 
 import java.util.HashMap;
 
-import android.R.integer;
-import android.os.Bundle;
-import commlab.weejang.demo.MeasureService;
+
 
 
 public interface Measurable

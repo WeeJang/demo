@@ -1,4 +1,6 @@
-package commlab.weejang.demo.db;
+package commlab.weejang.demo.aidl;
+
+import commlab.weejang.demo.db.MeasureData;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -10,7 +12,11 @@ import android.os.Parcelable;
  */
 public class ClientMessage extends MeasureData implements Parcelable
 {
-
+	public ClientMessage()
+	{
+		super(0, null, null);
+	}
+	
 	public ClientMessage(long timeStamp, String dataType, String dataInfo)
 	{
 		super(timeStamp, dataType, dataInfo);
@@ -48,6 +54,13 @@ public class ClientMessage extends MeasureData implements Parcelable
 		dest.writeLong(timeStamp);
 		dest.writeString(dataType);
 		dest.writeString(dataInfo);
+	}
+	
+	public void readFromParcel(Parcel source)
+	{
+		timeStamp = source.readLong();
+		dataType = source.readString();
+		dataInfo = source.readString();
 	}
 	
 	

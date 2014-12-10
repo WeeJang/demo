@@ -23,7 +23,7 @@ public class ClientMessage extends MeasureData implements Parcelable
 		// TODO Auto-generated method stub
 	}
 
-	public static final Parcelable.Creator<ClientMessage> CEATOR= new Parcelable.Creator<ClientMessage>(){
+	public static final Parcelable.Creator<ClientMessage> CREATOR= new Parcelable.Creator<ClientMessage>(){
 
 		@Override
 		public ClientMessage createFromParcel(Parcel source)

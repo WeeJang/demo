@@ -27,19 +27,18 @@ public class TrafficInfo implements Measurable
 	@Override
 	public HashMap<String, String> MeasureParameters()
 	{
-		
-		long recevieBytes = TrafficStats.getMobileRxBytes();
-		long receviePackets = TrafficStats.getMobileRxPackets();
-		long totalBytes = TrafficStats.getTotalRxBytes();
-		long totalPackets = TrafficStats.getTotalRxPackets();
-		
+
 		infoMap.clear();
 		infoMap.put("measuretimestamp", String.valueOf(System.currentTimeMillis()));
-		infoMap.put("receivebytes", String.valueOf(recevieBytes));
-		infoMap.put("receivepackets", String.valueOf(receviePackets));
-		infoMap.put("totalbytes",String.valueOf(totalBytes));
-		infoMap.put("totalPackets",String.valueOf(totalPackets));
-	
+		//UE 全部流量(WiFi + MN)
+		infoMap.put("totalRxbytes",String.valueOf( TrafficStats.getTotalRxBytes()));
+		infoMap.put("totalRxPackets",String.valueOf(TrafficStats.getTotalRxPackets()));
+		
+		
+//		//仅移动网络流量(MN)
+//		infoMap.put("mobileRxBytes", String.valueOf(TrafficStats.getMobileRxBytes()));
+//		infoMap.put("moblieRxPacket", String.valueOf(TrafficStats.getMobileRxPackets()));
+		
 		return infoMap;
 	}
 

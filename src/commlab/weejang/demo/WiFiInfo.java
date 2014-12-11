@@ -54,17 +54,20 @@ public class WiFiInfo implements Measurable
 
 			infoHashMap.clear();
 			infoHashMap.put("SSID", mWifiInfo.getSSID());
-			infoHashMap.put("BSSID", mWifiInfo.getBSSID());
-			infoHashMap.put("MAC", mWifiInfo.getMacAddress());
-			infoHashMap.put("HiddenSSID",
-					String.valueOf(mWifiInfo.getHiddenSSID()));
-			infoHashMap.put("IP",
-					String.valueOf(mWifiInfo.getIpAddress()));
 			infoHashMap.put("LinkSpeed",
 					String.valueOf(mWifiInfo.getLinkSpeed()));
 			infoHashMap.put("RSSI", String.valueOf(mWifiInfo.getRssi()));
-			infoHashMap.put("NetWorkID",
-					String.valueOf(mWifiInfo.getNetworkId()));
+			
+			//暂时不使用
+//			infoHashMap.put("NetWorkID",
+//					String.valueOf(mWifiInfo.getNetworkId()));
+//			infoHashMap.put("BSSID", mWifiInfo.getBSSID());
+//			infoHashMap.put("MAC", mWifiInfo.getMacAddress());
+//			infoHashMap.put("HiddenSSID",
+//					String.valueOf(mWifiInfo.getHiddenSSID()));
+//			infoHashMap.put("IP",
+//					String.valueOf(mWifiInfo.getIpAddress()));
+			
 		}
 		return infoHashMap;
 	}

@@ -213,53 +213,56 @@ public class UmtsInfo implements Measurable
 			 * mEvdoDbm + " " + mEvdoEcio + " " + mEvdoSnr + " " +
 			 * mLteSignalStrength + " " + mLteRsrp + " " + mLteRsrq + " " +
 			 * mLteRssnr + " " + mLteCqi + " " + (isGsm ? "gsm|lte" : "cdma"
-			 */
-			Log.i(TAG, "Error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-			
+			 */			
 			synchronized (this)
 			{
+				
 				mInfoMap.clear();
+				mInfoMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
 				mInfoMap.put("mGsmSignalStrength",
 						String.valueOf(signalStrength.getGsmSignalStrength()));
 				mInfoMap.put("mGsmBitErrorRate",
 						String.valueOf(signalStrength.getGsmBitErrorRate()));
-				mInfoMap.put("mCdmaDbm",
-						String.valueOf(signalStrength.getCdmaDbm()));
-				mInfoMap.put("mCdmaEcio",
-						String.valueOf(signalStrength.getCdmaEcio()));
-				mInfoMap.put("mEvdoDbm",
-						String.valueOf(signalStrength.getEvdoDbm()));
-				mInfoMap.put("mEvdoEcio",
-						String.valueOf(signalStrength.getEvdoEcio()));
-				mInfoMap.put("mEvdoSnr",
-						String.valueOf(signalStrength.getEvdoSnr()));
-				mInfoMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
+				
+//				//暂时不使用				
+//				mInfoMap.put("mCdmaDbm",
+//						String.valueOf(signalStrength.getCdmaDbm()));
+//				mInfoMap.put("mCdmaEcio",
+//						String.valueOf(signalStrength.getCdmaEcio()));
+//				mInfoMap.put("mEvdoDbm",
+//						String.valueOf(signalStrength.getEvdoDbm()));
+//				mInfoMap.put("mEvdoEcio",
+//						String.valueOf(signalStrength.getEvdoEcio()));
+//				mInfoMap.put("mEvdoSnr",
+//						String.valueOf(signalStrength.getEvdoSnr()));
+		
 
 				// mInfoMap.put("mLteSignalStrength",
 				// String.valueOf(signalStrength.getLteSignalStrength()));
 				// 反射获取
 
-				try
-				{
-					mInfoMap.put("mLteSignalStrength", String
-							.valueOf(lteSignalStrengthField.get(signalStrength)));
-					mInfoMap.put("mLteRsrp",
-							String.valueOf(lteRsrpField.get(signalStrength)));
-					mInfoMap.put("mLteRsrq",
-							String.valueOf(lteRsrqField.get(signalStrength)));
-					mInfoMap.put("mLteCqi",
-							String.valueOf(lteCqiField.get(signalStrength)));
-				} catch (IllegalAccessException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalArgumentException e)
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try
+//				{
+//					mInfoMap.put("mLteSignalStrength", String
+//							.valueOf(lteSignalStrengthField.get(signalStrength)));
+//					mInfoMap.put("mLteRsrp",
+//							String.valueOf(lteRsrpField.get(signalStrength)));
+//					mInfoMap.put("mLteRsrq",
+//							String.valueOf(lteRsrqField.get(signalStrength)));
+//					mInfoMap.put("mLteCqi",
+//							String.valueOf(lteCqiField.get(signalStrength)));
+//				} catch (IllegalAccessException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				} catch (IllegalArgumentException e)
+//				{
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 
 			}
+			
 		}
 
 		@Override

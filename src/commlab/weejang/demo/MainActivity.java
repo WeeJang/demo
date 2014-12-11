@@ -27,11 +27,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 	private Intent intent;
 	
 	// 控件
-//	TextView umtsTextView = null;
-//	TextView wifiTextView = null;
-//	TextView trafficTextView = null;
-//	Button getButton = null;
-		
+	
 	Button startBtn;
 	Button pauseBtn;
 	Button continusBtn;
@@ -46,13 +42,6 @@ public class MainActivity extends Activity implements View.OnClickListener
 	{
 		super.onCreate(savedInstanceState);
 
-//		// 初始化一个Activity,并填充UI
-//		this.setContentView(R.layout.main_view);
-//		// 获取控件
-//		umtsTextView = (TextView) findViewById(R.id.umtsTextView);
-//		wifiTextView = (TextView) findViewById(R.id.wiFiTextView);
-//		trafficTextView = (TextView) findViewById(R.id.trafficTextView);
-//		getButton = (Button) findViewById(R.id.getButton);
 		
 		this.setContentView(R.layout.service_view);
 		startBtn = (Button)findViewById(R.id.startBtn);

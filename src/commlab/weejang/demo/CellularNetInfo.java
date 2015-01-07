@@ -26,7 +26,7 @@ import android.util.Log;
  */
 
 @SuppressLint("NewApi")
-public class UmtsInfo implements Measurable
+public class CellularNetInfo implements Measurable
 {
 
 	private static final String TAG = "MeasureUmtsThread";
@@ -90,7 +90,7 @@ public class UmtsInfo implements Measurable
 	 * @param looper
 	 *            处理该MSG的looper
 	 */
-	public UmtsInfo(Context context)
+	public CellularNetInfo(Context context)
 	{
 		this.mContext = context;
 	}

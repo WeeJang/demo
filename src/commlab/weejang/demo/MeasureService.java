@@ -90,7 +90,7 @@ public class MeasureService extends Service
 		mMeasureWoker = new MeasureDataWorker("MeasureAll");
 		mMeasureHandler = new MeasureHandler(mMeasureWoker.getLooper());
 		
-		mMeasureUMTSWorker = new MeasureWorker(new UmtsInfo(MeasureService.this), mMeasureHandler);
+		mMeasureUMTSWorker = new MeasureWorker(new CellularNetInfo(MeasureService.this), mMeasureHandler);
 		mMeasureWiFiWorker =new MeasureWorker(new WiFiInfo(MeasureService.this), mMeasureHandler);
 		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(), mMeasureHandler);
 		

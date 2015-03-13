@@ -7,32 +7,24 @@
         android:id="@+id/startBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_x="16dp"
-        android:layout_y="38dp"
+        android:layout_x="24dp"
+        android:layout_y="10dp"
         android:text="StartMeasure" />
 
     <Button
         android:id="@+id/pauseBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_x="18dp"
-        android:layout_y="104dp"
+        android:layout_x="22dp"
+        android:layout_y="61dp"
         android:text="PauseMeasure" />
-
-    <TextView
-        android:id="@+id/statuTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_x="16dp"
-        android:layout_y="394dp"
-        android:text="" />
 
     <Button
         android:id="@+id/continueBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="124dp"
         android:layout_height="wrap_content"
-        android:layout_x="20dp"
-        android:layout_y="174dp"
+        android:layout_x="22dp"
+        android:layout_y="113dp"
         android:text="Continue" />
 
     <Button
@@ -40,7 +32,40 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_x="20dp"
-        android:layout_y="242dp"
+        android:layout_y="167dp"
         android:text="StopMeasure" />
+
+    <Button
+        android:id="@+id/uploadBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="22dp"
+        android:layout_y="220dp"
+        android:text="UploadData" />
+
+    <TextView
+        android:id="@+id/statuTextView"
+        android:layout_width="269dp"
+        android:layout_height="74dp"
+        android:layout_x="16dp"
+        android:layout_y="303dp"
+        android:text="Statue :" />
+
+    <TextView
+        android:id="@+id/infoTextView"
+        android:layout_width="271dp"
+        android:layout_height="59dp"
+        android:layout_x="17dp"
+        android:layout_y="382dp"
+        android:text="Info : "
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Button
+        android:id="@+id/refreshInfoBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_x="163dp"
+        android:layout_y="219dp"
+        android:text="refreshInfo" />
 
 </AbsoluteLayout>

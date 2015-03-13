@@ -1087,7 +1087,7 @@ containing a value of this type.
         public static final int beginning=0x7f050011;
         public static final int checkbox=0x7f05002d;
         public static final int collapseActionView=0x7f05000d;
-        public static final int continueBtn=0x7f050044;
+        public static final int continueBtn=0x7f050043;
         public static final int default_activity_button=0x7f050028;
         public static final int dialog=0x7f05000e;
         public static final int disableHome=0x7f050008;
@@ -1102,6 +1102,7 @@ containing a value of this type.
         public static final int icon=0x7f05002a;
         public static final int ifRoom=0x7f05000a;
         public static final int image=0x7f050027;
+        public static final int infoTextView=0x7f050047;
         public static final int listMode=0x7f050001;
         public static final int list_item=0x7f050029;
         public static final int middle=0x7f050012;
@@ -1113,6 +1114,7 @@ containing a value of this type.
         public static final int progress_circular=0x7f050018;
         public static final int progress_horizontal=0x7f050019;
         public static final int radio=0x7f05002f;
+        public static final int refreshInfoBtn=0x7f050048;
         public static final int search_badge=0x7f050032;
         public static final int search_bar=0x7f050031;
         public static final int search_button=0x7f050033;
@@ -1129,8 +1131,8 @@ containing a value of this type.
         public static final int showTitle=0x7f050006;
         public static final int split_action_bar=0x7f05001e;
         public static final int startBtn=0x7f050041;
-        public static final int statuTextView=0x7f050043;
-        public static final int stopBtn=0x7f050045;
+        public static final int statuTextView=0x7f050046;
+        public static final int stopBtn=0x7f050044;
         public static final int submit_area=0x7f050039;
         public static final int tabMode=0x7f050002;
         public static final int title=0x7f05002b;
@@ -1138,6 +1140,7 @@ containing a value of this type.
         public static final int trafficTextView=0x7f05003e;
         public static final int umtsTextView=0x7f05003d;
         public static final int up=0x7f050021;
+        public static final int uploadBtn=0x7f050045;
         public static final int useLogo=0x7f050003;
         public static final int wiFiTextView=0x7f05003c;
         public static final int withText=0x7f05000c;

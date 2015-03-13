@@ -17,6 +17,7 @@ import commlab.weejang.demo.aidl.ClientMessage;
 import commlab.weejang.demo.aidl.IMeasureService;
 import commlab.weejang.demo.db.DBManager;
 import commlab.weejang.demo.db.MeasureData;
+import commlab.weejang.demo.utils.EventHandler;
 import commlab.weejang.demo.utils.GlobalVar;
 import android.app.Service;
 import android.content.Context;
@@ -47,7 +48,6 @@ public class MeasureService extends Service
 	//测量数据处理类
 	private  MeasureHandler mMeasureHandler;
 	
-	
 
 	// 测量UMTS
 	private MeasureWorker mMeasureUMTSWorker  ;
@@ -55,11 +55,11 @@ public class MeasureService extends Service
 	private MeasureWorker mMeasureWiFiWorker  ;
 	//测量Traffic
 	private  MeasureWorker mMeasureTrafficWorker;
-	
-	
-	
+
 	//测量信息 直接写入数据库，不再设立缓冲区
 	//private List<MeasureData> mMeasureDataList ;
+	
+	
 	
 	
 	static{
@@ -83,6 +83,12 @@ public class MeasureService extends Service
 	
 	
 	
+	public DBManager getmDbManager()
+	{
+		return mDbManager;
+	}
+
+
 	public MeasureService()
 	{
 		super();
@@ -126,7 +132,6 @@ public class MeasureService extends Service
 	@Override
 	 public int onStartCommand(Intent intent, int flags, int startId)
 	 {
-		
 		Bundle data = intent.getExtras();
 		switch (data.getInt("OPF"))
 		{
@@ -151,7 +156,16 @@ public class MeasureService extends Service
 				this.stopSelf();
 				Log.i(TAG,"receive OPF:  stop" );
 			break;
+			
+		case GlobalVar.SERVICE_OPERATOR_FLAG_UPLOAD:
+				uploadMeasure();
+				Log.i(TAG,"receive OPF: upload");
+			break;
 	
+		case GlobalVar.SERVICE_OPERATOR_FLAG_REFRESHINFO:
+				refreshInfo();
+				Log.i("TAG","receive OPF: refreshInfo");
+			break;
 		default:
 			break;
 		}
@@ -222,8 +236,24 @@ public class MeasureService extends Service
 //				mMeasureDataList.clear();
 //			}			
 		}
-
-
+		
+		//刷新信息
+		private void refreshInfo(){
+			Bundle eventData = new Bundle();
+			eventData.putInt("eventType", GlobalVar.MAIN_EVENT_FLAG_REFRESH_INFO);
+			eventData.putString("dataInfo", mDbManager.getDBInfo());
+			EventHandler.getInstance().postEvent(eventData);
+		}
+		
+		//上传测量数据
+		private void uploadMeasure()
+		{
+			//暂停测量
+			pauseMeasure();
+			//开启上传线程
+			UploadDataWorker uploadDataWorker = new UploadDataWorker(this.getmDbManager());
+			new Thread(uploadDataWorker).start();
+		}
 		
 		//MeasureHandler 负责处理收到的测量数据消息
 		private class MeasureHandler  extends Handler
@@ -286,6 +316,7 @@ public class MeasureService extends Service
 					Log.i(TAG,"receive traffic data: " + mData.toString());
 					
 					break;
+				
 				default:
 					break;
 				}

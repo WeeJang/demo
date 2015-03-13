@@ -20,9 +20,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver
 		{
 			Intent startService = new Intent(context,MeasureService.class);
 			startService.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			
 			context.startService(startService);
 		}
 	}
-
 }

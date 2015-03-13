@@ -5,10 +5,20 @@ package commlab.weejang.demo;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import commlab.weejang.demo.utils.EventHandler;
 import commlab.weejang.demo.utils.GlobalVar;
+import commlab.weejang.demo.utils.HttpUtils;
+import commlab.weejang.demo.utils.WeakHandler;
+import android.R.string;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.Settings.Global;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +34,8 @@ public class MainActivity extends Activity implements View.OnClickListener
 
 	private static final String TAG = "MainActivity";
 	
+	private SignalShark signalShark;
+	
 	private Intent intent;
 	
 	// 控件
@@ -32,7 +44,12 @@ public class MainActivity extends Activity implements View.OnClickListener
 	Button pauseBtn;
 	Button continusBtn;
 	Button stopBtn;
-	TextView statuTView;
+	Button uploadBtn;
+	Button refreshInfoBtn;
+	
+	TextView statuTextView;
+	TextView infoTextView;
+	
 	
 	
 	
@@ -41,29 +58,35 @@ public class MainActivity extends Activity implements View.OnClickListener
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
-		
 		this.setContentView(R.layout.service_view);
+		
+		signalShark = (SignalShark)this.getApplication();
+		
 		startBtn = (Button)findViewById(R.id.startBtn);
 		pauseBtn =(Button)findViewById(R.id.pauseBtn);
 		continusBtn =(Button)findViewById(R.id.continueBtn);
 		stopBtn = (Button)findViewById(R.id.stopBtn);
+		uploadBtn =(Button)findViewById(R.id.uploadBtn);
+		refreshInfoBtn = (Button)findViewById(R.id.refreshInfoBtn);
 		
-		statuTView = (TextView)findViewById(R.id.statuTextView);
+		statuTextView = (TextView)findViewById(R.id.statuTextView);
+		infoTextView = (TextView)findViewById(R.id.infoTextView);
 		
 		startBtn.setOnClickListener(this);
 		pauseBtn.setOnClickListener(this);
 		continusBtn.setOnClickListener(this);
 		stopBtn.setOnClickListener(this);
+		uploadBtn.setOnClickListener(this);
+		refreshInfoBtn.setOnClickListener(this);
 		
 		startBtn.setEnabled(true);
 		pauseBtn.setEnabled(false);
 		continusBtn.setEnabled(false);
 		stopBtn.setEnabled(false);
 		
+		//注册handler
+		EventHandler.getInstance().addHandler(mHandler);
 		
-		
-
 	}
 		
 		public void onClick(View v)
@@ -77,7 +100,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 			//启动测量
 			case R.id.startBtn:
 					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_START;
-					statuTView.setText("started");
+					statuTextView.setText("started");
 					
 					startBtn.setEnabled(false);
 					continusBtn.setEnabled(false);
@@ -89,7 +112,7 @@ public class MainActivity extends Activity implements View.OnClickListener
 			//暂停测量
 			case R.id.pauseBtn:
 					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_PAUSE;
-					statuTView.setText("paused");
+					statuTextView.setText("paused");
 						
 					pauseBtn.setEnabled(false);
 					continusBtn.setEnabled(true);
@@ -103,13 +126,12 @@ public class MainActivity extends Activity implements View.OnClickListener
 			
 			case R.id.continueBtn:
 					operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_CONTIUE;
-					statuTView.setText("continued");
+					statuTextView.setText("continued");
 					
 					startBtn.setEnabled(false);
 					pauseBtn.setEnabled(true);
 					continusBtn.setEnabled(false);
 					stopBtn.setEnabled(true);
-					
 					
 					Log.i(TAG, "continueBtn");
 					break;
@@ -123,10 +145,28 @@ public class MainActivity extends Activity implements View.OnClickListener
 				 	continusBtn.setEnabled(false);
 				 	stopBtn.setEnabled(false);
 				 	
-				 	
-				 	statuTView.setText("stoped");
+				 	statuTextView.setText("stoped");
 				 	Log.i(TAG, "stopBtn");
 				 break;
+				 
+			//上传数据	 
+			case R.id.uploadBtn:
+				operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_UPLOAD;
+				
+				statuTextView.setText("uploading data ...");
+				
+				pauseBtn.setEnabled(false);
+				continusBtn.setEnabled(true);
+				stopBtn.setEnabled(false);	
+				startBtn.setEnabled(false);
+
+				break;
+
+			case R.id.refreshInfoBtn:
+				operatorFlag = GlobalVar.SERVICE_OPERATOR_FLAG_REFRESHINFO;
+				Log.i(TAG, "refreshInfo");
+				break;
+				
 			default:
 				break;
 			}
@@ -139,8 +179,48 @@ public class MainActivity extends Activity implements View.OnClickListener
 			startService(intent);
 
 		}
+		
+		private void setStatue(String statue){
+			this.statuTextView.setText(statue);
+		}
+		
+		private void setInfo(String info){
+			this.infoTextView.setText(info);
+		}
+		
+		//MainActivity Handler
+		public  Handler mHandler = new MainActivityHandler(this);
+				
+		private static  class MainActivityHandler extends WeakHandler<MainActivity>{
 
-	
-
-
+			public MainActivityHandler(MainActivity owner)
+			{
+				super(owner);
+			}
+			@Override
+			public void handleMessage(Message msg){
+				MainActivity mainActivity = this.getOwner();
+				Log.i(TAG,"MainActivityHandler Got Event!");
+				if(mainActivity == null){
+					Log.v(TAG,"MainActivity is null!");
+					return;
+				}
+				Bundle data = msg.getData();
+				int eventType = data.getInt("eventType");
+				
+				switch(eventType){
+				case GlobalVar.MAIN_EVENT_FLAG_UPLOAD_FINISHED:
+						mainActivity.setStatue("upload Finished!");
+					break;
+				case GlobalVar.MAIN_EVENT_FLAG_UPLOAD_ERROR:
+						mainActivity.setStatue("upload Error!");
+					break;
+				case GlobalVar.MAIN_EVENT_FLAG_REFRESH_INFO:
+						mainActivity.setInfo(data.getString("dataInfo"));
+					break;
+				default:
+					break;
+				}
+			}
+		}
 }

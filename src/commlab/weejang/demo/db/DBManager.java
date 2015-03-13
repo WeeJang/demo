@@ -2,8 +2,14 @@ package commlab.weejang.demo.db;
 
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import commlab.weejang.demo.utils.GlobalVar;
+import android.R.string;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -14,12 +20,11 @@ import android.util.Log;
  */
 public class DBManager
 {
-	
 	private static final String TAG = "DBManager";
 	
 	private DBHelper dbHelper;
 	private SQLiteDatabase db;
-	
+		
 	public DBManager(Context context)
 	{
 		dbHelper = new DBHelper(context);
@@ -34,19 +39,14 @@ public class DBManager
 		updateTable(GlobalVar.dbTableName);
 	}
 	
-	
 	/**
 	 * add measureData单个元素
 	 */
 	public void add(MeasureData measureData)
 	{
-		db.execSQL("INSERT INTO "+ GlobalVar.dbTableName + " VALUES(null,?,?,?)",
+		db.execSQL("INSERT INTO " +GlobalVar.dbTableName + "  VALUES (null,?,?,?)",
 								new Object[]{measureData.timeStamp,measureData.dataType,measureData.dataInfo});
 	}
-	
-	
-	
-	
 	
 	/**
 	 * add meausreData 多个元素
@@ -56,14 +56,12 @@ public class DBManager
 	{
 		//开始事务
 		db.beginTransaction();
-		
 		try
 		{
 			for (MeasureData measureData : measureDatas)
 			{				
-				db.execSQL("INSERT INTO " +GlobalVar.dbTableName + " VALUES(null,?,?,?)", 
+				db.execSQL("INSERT INTO " + GlobalVar.dbTableName + " VALUES(null,?,?,?)", 
 						new Object[]{measureData.timeStamp,measureData.dataType,measureData.dataInfo});
-				
 				Log.i(TAG, String.valueOf(measureData.timeStamp) +measureData.dataType + measureData.dataInfo);
 			}
 			//设置事务完成		
@@ -79,8 +77,63 @@ public class DBManager
 		}
 	}
 	
-		
+	/**
+	 * 返回数据库中最大的_id
+	 */
+	public int getMaxId(){
+
+		String strSql = "SELECT MAX(_id) AS maxId from " + GlobalVar.dbTableName;
+		Cursor mCursor = db.rawQuery(strSql,null);
+		//!
+		mCursor.moveToNext();
+		return mCursor.getInt(mCursor.getColumnIndex("maxId"));
+	}
 	
+	
+	/**
+	 * packed data 2 json 
+	 * @throws JSONException 
+	 */
+	public JSONObject packedData2JSON(long startIndex,long endIndex) throws JSONException{
+		
+		if(    (startIndex < 0) || 
+				(endIndex < 0 ) ||
+			    (startIndex > endIndex)){
+			return null;
+		}
+		
+		JSONObject retJson= new JSONObject();
+		int count = 0;
+		
+		Cursor result = db.rawQuery("SELECT time_stamp,data_type,data_info FROM " +GlobalVar.dbTableName +  " where (_id >= ? and _id < ?)", 
+																new String[]{String.valueOf(startIndex),String.valueOf(endIndex)});
+		Log.i(TAG, "find [ ] " + startIndex +" " + endIndex);
+		
+		//检查是否为空
+		if(!result.moveToFirst()){
+			return null;
+		}
+		
+		while( !result.isAfterLast() ){
+			JSONObject dataElem = new JSONObject();
+			dataElem.put("timeStamp", result.getLong(0));
+			dataElem.put("dataType", result.getString(1));
+			dataElem.put("dataInfo", result.getString(2));
+			Log.i(TAG,"result : " + result.getLong(0) + " " + result.getString(1) + " " + result.getString(2));
+			retJson.put(String.valueOf(count++), dataElem);
+			//!
+			result.moveToNext();
+		}
+		retJson.put("dataNum", count);
+		//{1:{},2:{},……,dataNum:5}
+		return retJson;
+	}
+	
+	
+	
+	/**
+	 * 关闭数据库
+	 */
 	public void closeDB()
 	{
 		db.close();
@@ -94,5 +147,11 @@ public class DBManager
 				"(_id INTEGER PRIMARY KEY AUTOINCREMENT,time_stamp VARCHAR,data_type VARCHAR,data_info TEXT)");
 	}
 	
-	
+	public String getDBInfo(){
+		StringBuffer  retString = new StringBuffer();
+		retString.append("[CurrentTable]").append(GlobalVar.dbTableName);
+		retString.append("[MaxId]").append(String.valueOf(getMaxId()));
+		retString.append("[UploadedIn]").append(String.valueOf(GlobalVar.uploadedLastIndex));
+		return retString.toString();
+	}
 }

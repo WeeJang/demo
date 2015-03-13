@@ -20,8 +20,6 @@ public class MeasureWorker implements Runnable
 	private  Measurable mMeasurable ;
 	private Handler mHandler;
 	
-	
-	
 	private boolean isProcExist = false;
 	private boolean isProcPause = false;
 	

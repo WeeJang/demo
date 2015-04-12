@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 
-import commlab.weejang.demo.interfaces.Measurable;
+import commlab.weejang.demo.interfaces.IMeasurable;
 import commlab.weejang.demo.utils.GlobalVar;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -17,69 +17,59 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 /**
- *
  * Cellular NetWork测量
+ * 
  * @author jangwee
- *
- *      
- *
  */
 
 @SuppressLint("NewApi")
-public class CellularNetInfo implements Measurable
+public class CellularNetInfo implements IMeasurable
 {
-
+	// log tag
 	private static final String TAG = "MeasureUmtsThread";
-
+	// 上下文
 	private Context mContext = null;
 	// 管理器
 	private TelephonyManager mTelephonyManager = null;
 	// 存储测量信息
 	private static HashMap<String, String> mInfoMap = new HashMap<String, String>();
-	
 
-	// 跟LTE相关的API都被@hide了，怎么获得? :) 反射！
+	// 跟LTE相关的API在这一版本被@hide，通过reflect获取
 	static Class<?> SS;
-
-	// //是获取Method(成员函数),不用这么麻烦，直接获取Field(成员变量)
-
 	static Field lteSignalStrengthField;
 	static Field lteRsrpField;
 	static Field lteRsrqField;
 	static Field lteRssnrField;
 	static Field lteCqiField;
 
-	// 加载反射相关，动态加载
 	static
 	{
 		try
 		{
+			// 获取class对象
 			SS = Class.forName("android.telephony.SignalStrength");
 
+			// 获取Field(成员变量)
 			lteSignalStrengthField = SS.getDeclaredField("mLteSignalStrength");
 			lteRsrpField = SS.getDeclaredField("mLteRsrp");
 			lteRsrqField = SS.getDeclaredField("mLteRsrq");
 			lteRssnrField = SS.getDeclaredField("mLteRssnr");
 			lteCqiField = SS.getDeclaredField("mLteCqi");
 
-			// 提升权限
+			// 提升访问权限
 			lteSignalStrengthField.setAccessible(true);
 			lteRsrpField.setAccessible(true);
 			lteRsrqField.setAccessible(true);
 			lteRssnrField.setAccessible(true);
 			lteCqiField.setAccessible(true);
-
 		} catch (ClassNotFoundException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchFieldException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -87,19 +77,18 @@ public class CellularNetInfo implements Measurable
 	/**
 	 * 构造函数
 	 * 
-	 * @param looper
-	 *            处理该MSG的looper
+	 * @param context
+	 *            context 上下文
 	 */
 	public CellularNetInfo(Context context)
 	{
 		this.mContext = context;
 	}
 
-
 	@Override
 	public int IdentifyMeasurable()
 	{
-		return GlobalVar.MSG_HANDLER_MEASURE_UMTS;
+		return GlobalVar.MSG_HANDLER_MEASURE_LTE;
 	}
 
 	@Override
@@ -108,21 +97,19 @@ public class CellularNetInfo implements Measurable
 		return mInfoMap;
 	}
 
-	
-	
 	@Override
 	public void initDevice()
 	{
-		// 设置监听 : 这里有大量信息
-		mTelephonyManager = (TelephonyManager)mContext 
+		// 获取电信服务管理器
+		mTelephonyManager = (TelephonyManager) mContext
 				.getSystemService(Context.TELEPHONY_SERVICE);
-
+		// 添加监听器
 		mTelephonyManager.listen(new MyPhoneStateListener(),
 				PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
 						| PhoneStateListener.LISTEN_SERVICE_STATE);
 	}
-	
-	// 监听器负责更新（观察者模式）
+
+	// 自定义监听器：负责更新（观察者模式）
 	private class MyPhoneStateListener extends PhoneStateListener
 	{
 
@@ -187,7 +174,7 @@ public class CellularNetInfo implements Measurable
 		 */
 		public void onSignalStrengthsChanged(SignalStrength signalStrength)
 		{
-			
+
 			Log.i(TAG, "Error~~~~~~~~~~~~~~~~~~~~~~~");
 			super.onSignalStrengthsChanged(signalStrength);
 
@@ -213,56 +200,53 @@ public class CellularNetInfo implements Measurable
 			 * mEvdoDbm + " " + mEvdoEcio + " " + mEvdoSnr + " " +
 			 * mLteSignalStrength + " " + mLteRsrp + " " + mLteRsrq + " " +
 			 * mLteRssnr + " " + mLteCqi + " " + (isGsm ? "gsm|lte" : "cdma"
-			 */			
+			 */
 			synchronized (this)
 			{
-				
+
 				mInfoMap.clear();
 				mInfoMap.put("isGSM", String.valueOf(signalStrength.isGsm()));
 				mInfoMap.put("mGsmSignalStrength",
 						String.valueOf(signalStrength.getGsmSignalStrength()));
 				mInfoMap.put("mGsmBitErrorRate",
 						String.valueOf(signalStrength.getGsmBitErrorRate()));
-				
-//				//暂时不使用				
-//				mInfoMap.put("mCdmaDbm",
-//						String.valueOf(signalStrength.getCdmaDbm()));
-//				mInfoMap.put("mCdmaEcio",
-//						String.valueOf(signalStrength.getCdmaEcio()));
-//				mInfoMap.put("mEvdoDbm",
-//						String.valueOf(signalStrength.getEvdoDbm()));
-//				mInfoMap.put("mEvdoEcio",
-//						String.valueOf(signalStrength.getEvdoEcio()));
-//				mInfoMap.put("mEvdoSnr",
-//						String.valueOf(signalStrength.getEvdoSnr()));
-		
+
+				// //暂时不使用
+				// mInfoMap.put("mCdmaDbm",
+				// String.valueOf(signalStrength.getCdmaDbm()));
+				// mInfoMap.put("mCdmaEcio",
+				// String.valueOf(signalStrength.getCdmaEcio()));
+				// mInfoMap.put("mEvdoDbm",
+				// String.valueOf(signalStrength.getEvdoDbm()));
+				// mInfoMap.put("mEvdoEcio",
+				// String.valueOf(signalStrength.getEvdoEcio()));
+				// mInfoMap.put("mEvdoSnr",
+				// String.valueOf(signalStrength.getEvdoSnr()));
 
 				// mInfoMap.put("mLteSignalStrength",
 				// String.valueOf(signalStrength.getLteSignalStrength()));
 				// 反射获取
 
-//				try
-//				{
-//					mInfoMap.put("mLteSignalStrength", String
-//							.valueOf(lteSignalStrengthField.get(signalStrength)));
-//					mInfoMap.put("mLteRsrp",
-//							String.valueOf(lteRsrpField.get(signalStrength)));
-//					mInfoMap.put("mLteRsrq",
-//							String.valueOf(lteRsrqField.get(signalStrength)));
-//					mInfoMap.put("mLteCqi",
-//							String.valueOf(lteCqiField.get(signalStrength)));
-//				} catch (IllegalAccessException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				} catch (IllegalArgumentException e)
-//				{
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-
+				// try
+				// {
+				// mInfoMap.put("mLteSignalStrength", String
+				// .valueOf(lteSignalStrengthField.get(signalStrength)));
+				// mInfoMap.put("mLteRsrp",
+				// String.valueOf(lteRsrpField.get(signalStrength)));
+				// mInfoMap.put("mLteRsrq",
+				// String.valueOf(lteRsrqField.get(signalStrength)));
+				// mInfoMap.put("mLteCqi",
+				// String.valueOf(lteCqiField.get(signalStrength)));
+				// } catch (IllegalAccessException e)
+				// {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// } catch (IllegalArgumentException e)
+				// {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// }
 			}
-			
 		}
 
 		@Override
@@ -275,11 +259,5 @@ public class CellularNetInfo implements Measurable
 		{
 			super.onCellInfoChanged(cellInfo);
 		}
-
 	}
-
-
-
-
-
 }

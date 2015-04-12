@@ -8,9 +8,7 @@ package commlab.weejang.demo.interfaces;
 import java.util.HashMap;
 
 
-
-
-public interface Measurable
+public interface IMeasurable
 {
 	//身份验证
 	abstract int IdentifyMeasurable();

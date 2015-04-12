@@ -16,29 +16,34 @@ import android.util.Log;
 
 /**
  * http utils
+ * 
  * @author jangwee
- *  
+ * 
  */
-public class HttpUtils{
-	
-	private static final String TAG = "HttpUtils";		
-	
+public class HttpUtils
+{
+
+	private static final String TAG = "HttpUtils";
+
 	@SuppressWarnings("finally")
-	public static boolean postJSONData(JSONObject jsonObject)throws Exception{
+	public static boolean postJSONData(JSONObject jsonObject) throws Exception
+	{
 		HttpClient httpClient = new DefaultHttpClient();
 		HttpPost httpPost = new HttpPost(GlobalVar.uploadDataUrl);
-		//add http header
+		// add http header
 		httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
-	
-		httpPost.setEntity(new StringEntity("measureData=" + jsonObject.toString()));			
+
+		httpPost.setEntity(new StringEntity("measureData="
+				+ jsonObject.toString()));
 		HttpResponse httpResponse = httpClient.execute(httpPost);
 
 		Log.i(TAG, httpResponse.getStatusLine().toString());
-		
-		if(httpResponse.getStatusLine().getStatusCode() == 200){
+
+		if (httpResponse.getStatusLine().getStatusCode() == 200)
+		{
 			return true;
-		}
-		else{
+		} else
+		{
 			return false;
 		}
 	}

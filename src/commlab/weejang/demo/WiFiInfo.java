@@ -2,7 +2,7 @@ package commlab.weejang.demo;
 
 import java.util.HashMap;
 
-import commlab.weejang.demo.interfaces.Measurable;
+import commlab.weejang.demo.interfaces.IMeasurable;
 import commlab.weejang.demo.utils.GlobalVar;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
@@ -15,7 +15,7 @@ import android.net.wifi.WifiManager;
  * @author jangwee
  *
  */
-public class WiFiInfo implements Measurable
+public class WiFiInfo implements IMeasurable
 {
 
 	private Context mContext;
@@ -51,7 +51,7 @@ public class WiFiInfo implements Measurable
 		if (mWifiManager.getWifiState() == WifiManager.WIFI_STATE_ENABLED)
 		{
 			mWifiInfo = mWifiManager.getConnectionInfo();
-
+			
 			infoHashMap.clear();
 			infoHashMap.put("SSID", mWifiInfo.getSSID());
 			infoHashMap.put("LinkSpeed",

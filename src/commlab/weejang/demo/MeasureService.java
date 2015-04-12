@@ -8,9 +8,9 @@ package commlab.weejang.demo;
  */
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import commlab.weejang.demo.aidl.ClientMessage;
@@ -22,306 +22,275 @@ import commlab.weejang.demo.utils.GlobalVar;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.location.SettingInjectorService;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class MeasureService extends Service 
+public class MeasureService extends Service
 {
-
+	// log tag
 	private static final String TAG = "NoteService";
-	
-
-	
-	//数据库管理类
+	// 数据库管理器
 	private DBManager mDbManager;
-	//测量管理子线程类
-	private MeasureDataWorker mMeasureWoker;
+	// 测量管理LoopfulWorker
+	private LoopfulWorker mMeasureWoker;
+	// 测量数据Handler
+	private MeasureHandler mMeasureHandler;
 
-	//测量数据处理类
-	private  MeasureHandler mMeasureHandler;
-	
+	// 测量LTE worker
+	private MeasureWorker mMeasureLTEWorker;
+	// 测量WiFi worker
+	private MeasureWorker mMeasureWiFiWorker;
+	// 测量Traffic worker
+	private MeasureWorker mMeasureTrafficWorker;
+	// 测量TCP worker
+	private MeasureWorker mMeasureTCPWorker;
+	// 测量worker Group
+	private List<MeasureWorker> mMeasureWorkerGroup = new LinkedList<MeasureWorker>();
 
-	// 测量UMTS
-	private MeasureWorker mMeasureUMTSWorker  ;
-	// 测量WiFi
-	private MeasureWorker mMeasureWiFiWorker  ;
-	//测量Traffic
-	private  MeasureWorker mMeasureTrafficWorker;
-
-	//测量信息 直接写入数据库，不再设立缓冲区
-	//private List<MeasureData> mMeasureDataList ;
-	
-	
-	
-	
-	static{
-		
-	}
-	
-	//实现Remote 接口
+	// 实现Remote接口,为IPC预留
 	private final IMeasureService.Stub mBinder = new IMeasureService.Stub()
 	{
-		
 		@Override
 		public void collectClientMessage(int pid, ClientMessage clientMessage)
 				throws RemoteException
 		{
 			Log.i("IPC MSG", clientMessage.dataInfo);
-			//数据库开放一个直接写入的接口,为IPC
-			//mMeasureDataList.add(clientMessage);
+			// 写入数据库
 			mDbManager.add(clientMessage);
 		}
 	};
-	
-	
-	
+
+	// 获取数据库管理器
 	public DBManager getmDbManager()
 	{
 		return mDbManager;
 	}
 
-
+	// 构造函数
 	public MeasureService()
 	{
 		super();
-		
-		mMeasureWoker = new MeasureDataWorker("MeasureAll");
+		// 实例化LoopfulWorker,MeasureHandler
+		mMeasureWoker = new LoopfulWorker("MeasureAll");
 		mMeasureHandler = new MeasureHandler(mMeasureWoker.getLooper());
-		
-		mMeasureUMTSWorker = new MeasureWorker(new CellularNetInfo(MeasureService.this), mMeasureHandler);
-		mMeasureWiFiWorker =new MeasureWorker(new WiFiInfo(MeasureService.this), mMeasureHandler);
-		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(), mMeasureHandler);
-		
-		//mMeasureDataList = new ArrayList<MeasureData>(64);
+		// 实例化MeasureWorker
+		mMeasureLTEWorker = new MeasureWorker(new CellularNetInfo(
+				MeasureService.this), mMeasureHandler);
+		mMeasureWiFiWorker = new MeasureWorker(
+				new WiFiInfo(MeasureService.this), mMeasureHandler);
+		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(),
+				mMeasureHandler);
+		mMeasureTCPWorker = new MeasureWorker(new TCPInfo(), mMeasureHandler);
+		// 添加进组
+		mMeasureWorkerGroup.add(mMeasureLTEWorker);
+		mMeasureWorkerGroup.add(mMeasureWiFiWorker);
+		mMeasureWorkerGroup.add(mMeasureTrafficWorker);
+		mMeasureWorkerGroup.add(mMeasureTCPWorker);
 	}
-		
 
 	@Override
 	public IBinder onBind(Intent intent)
 	{
 		return mBinder;
 	}
-	
+
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
-		
-		//创建日志表名
-		TelephonyManager tm = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-		GlobalVar.dbTableName = "commlab_" +tm.getDeviceId()+"_"+ new SimpleDateFormat("yyyyMMdd").format(new Date());
-		
+		// 获取电信服务管理器
+		TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		// 创建数据库表名
+		GlobalVar.dbTableName = "commlab_" + tm.getDeviceId() + "_"
+				+ new SimpleDateFormat("yyyyMMdd").format(new Date());
+		// 实例化数据库
 		mDbManager = new DBManager(this);
-		//
-		//GlobalVar.dbTableName = mFormater.format(new Date());
-		//清除表已存在
+		// 清除表已存在
 		mDbManager.initDBManager();
 	}
-	
+
 	/**
 	 * 这个地方得改进
 	 */
+
 	@Override
-	 public int onStartCommand(Intent intent, int flags, int startId)
-	 {
+	public int onStartCommand(Intent intent, int flags, int startId)
+	{
 		Bundle data = intent.getExtras();
+		// 消息类型匹配
 		switch (data.getInt("OPF"))
 		{
+		// 启动服务
 		case GlobalVar.SERVICE_OPERATOR_FLAG_START:
-				Log.i(TAG,"receive OPF:  start" );
-				initMeasure();
-				startMeasure();
+			Log.i(TAG, "receive OPF:  start");
+			initMeasure();
+			startMeasure();
 			break;
-			
+		// 暂停服务
 		case GlobalVar.SERVICE_OPERATOR_FLAG_PAUSE:
-				pauseMeasure();
-				Log.i(TAG,"receive OPF:  pause" );
+			pauseMeasure();
+			Log.i(TAG, "receive OPF:  pause");
 			break;
-		
+		// 继续服务
 		case GlobalVar.SERVICE_OPERATOR_FLAG_CONTIUE:
-				continueMeasure();
-				Log.i(TAG,"receive OPF:  continue" );
-				break;
-		
+			continueMeasure();
+			Log.i(TAG, "receive OPF:  continue");
+			break;
+		// 暂停服务
 		case GlobalVar.SERVICE_OPERATOR_FLAG_STOP:
-				stopMeasure();
-				this.stopSelf();
-				Log.i(TAG,"receive OPF:  stop" );
+			stopMeasure();
+			this.stopSelf();
+			Log.i(TAG, "receive OPF:  stop");
 			break;
-			
+		// 上传服务
 		case GlobalVar.SERVICE_OPERATOR_FLAG_UPLOAD:
-				uploadMeasure();
-				Log.i(TAG,"receive OPF: upload");
+			uploadMeasure();
+			Log.i(TAG, "receive OPF: upload");
 			break;
-	
+		// 刷新服务
 		case GlobalVar.SERVICE_OPERATOR_FLAG_REFRESHINFO:
-				refreshInfo();
-				Log.i("TAG","receive OPF: refreshInfo");
+			refreshInfo();
+			Log.i("TAG", "receive OPF: refreshInfo");
 			break;
 		default:
 			break;
 		}
-		
-		return START_STICKY;
-	 }
-	
 
-		
+		return START_STICKY;
+	}
+
 	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
 		mDbManager.closeDB();
 	}
-			
-		//初始化测量
-		private void initMeasure()
+
+	// 初始化测量
+	private void initMeasure()
+	{
+		for (MeasureWorker measureWorker : mMeasureWorkerGroup)
 		{
-			mMeasureUMTSWorker.initMeasureProc();
-			mMeasureWiFiWorker.initMeasureProc();
-			mMeasureTrafficWorker.initMeasureProc();
+			measureWorker.initMeasureProc();
 		}
-		
-		//开始测量
-		private void startMeasure()
+	}
+
+	// 开始测量
+	private void startMeasure()
+	{
+		for (MeasureWorker measureWorker : mMeasureWorkerGroup)
 		{
-			mMeasureUMTSWorker.startMeasureProc();
-			mMeasureWiFiWorker.startMeasureProc();
-			mMeasureTrafficWorker.startMeasureProc();
+			measureWorker.startMeasureProc();
 		}
-		
-		//暂停测量
-		private void pauseMeasure()
+	}
+
+	// 暂停测量
+	private void pauseMeasure()
+	{
+		for (MeasureWorker measureWorker : mMeasureWorkerGroup)
 		{
-			
-			mMeasureUMTSWorker.pauseMeasureProc();
-			mMeasureWiFiWorker.pauseMeasureProc();	
-			mMeasureTrafficWorker.pauseMeasureProc();
-			
-//			//从列表写入数据库
-//			if (mMeasureDataList.size() > 0)
-//			{
-//				mDbManager.add(mMeasureDataList);
-//				mMeasureDataList.clear();
-//			}
+			measureWorker.pauseMeasureProc();
 		}
-		
-		//重启测量
-		private void continueMeasure()
+	}
+
+	// 重启测量
+	private void continueMeasure()
+	{
+		for (MeasureWorker measureWorker : mMeasureWorkerGroup)
 		{
-			mMeasureUMTSWorker.continueMeasureProc();
-			mMeasureWiFiWorker.continueMeasureProc();
-			mMeasureTrafficWorker.continueMeasureProc();
+			measureWorker.continueMeasureProc();
 		}
-		
-		//终止测量
-		private void stopMeasure()
+	}
+
+	// 终止测量
+	private void stopMeasure()
+	{
+		for (MeasureWorker measureWorker : mMeasureWorkerGroup)
 		{
-			mMeasureUMTSWorker.stopMeasureProc();
-			mMeasureWiFiWorker.stopMeasureProc();
-			mMeasureTrafficWorker.stopMeasureProc();
-		
-//			//写入数据库
-//			if (mMeasureDataList.size() > 0)
-//			{
-//				mDbManager.add(mMeasureDataList);
-//				mMeasureDataList.clear();
-//			}			
+			measureWorker.stopMeasureProc();
 		}
-		
-		//刷新信息
-		private void refreshInfo(){
-			Bundle eventData = new Bundle();
-			eventData.putInt("eventType", GlobalVar.MAIN_EVENT_FLAG_REFRESH_INFO);
-			eventData.putString("dataInfo", mDbManager.getDBInfo());
-			EventHandler.getInstance().postEvent(eventData);
-		}
-		
-		//上传测量数据
-		private void uploadMeasure()
+	}
+
+	// 刷新当前数据库信息
+	private void refreshInfo()
+	{
+		Bundle eventData = new Bundle();
+		eventData.putInt("eventType", GlobalVar.MAIN_EVENT_FLAG_REFRESH_INFO);
+		eventData.putString("dataInfo", mDbManager.getDBInfo());
+		// 通过事件总线发送消息
+		EventHandler.getInstance().postEvent(eventData);
+	}
+
+	// 上传测量数据
+	private void uploadMeasure()
+	{
+		// 暂停测量
+		pauseMeasure();
+		// 开启上传线程
+		UploadDataWorker uploadDataWorker = new UploadDataWorker(
+				this.getmDbManager());
+		new Thread(uploadDataWorker).start();
+	}
+
+	// MeasureHandler，负责处理收到的测量数据消息，暂时不接入事件总线，后期优化再汇入
+	private class MeasureHandler extends Handler
+	{
+		public MeasureHandler(Looper looper)
 		{
-			//暂停测量
-			pauseMeasure();
-			//开启上传线程
-			UploadDataWorker uploadDataWorker = new UploadDataWorker(this.getmDbManager());
-			new Thread(uploadDataWorker).start();
+			super(looper);
 		}
-		
-		//MeasureHandler 负责处理收到的测量数据消息
-		private class MeasureHandler  extends Handler
+
+		@Override
+		public void handleMessage(Message msg)
 		{
-			public MeasureHandler(Looper looper)
+			// data 格式： timestamp | flag | datainfo
+			Bundle data = msg.getData();
+			if (data == null)
+				return;
+
+			// 无时间戳，无效
+			Long timeStamp = data.getLong("timestamp");
+			if (timeStamp == null)
+				return;
+
+			HashMap<String, String> mData = (HashMap<String, String>) data
+					.getSerializable("data");
+			// 消息类型匹配
+			switch (msg.what)
 			{
-				super(looper);
-			}
-			
-			@Override
-			public void handleMessage(Message msg)
-			{
-				// data 格式 统一 ： timestamp + flag(omit) + datadetai
-				
-				//先判断临时存储区是否已经满
-//				if (mMeasureDataList.size() > 60)
-//				{
-//					//写入数据库
-//					mDbManager.add(mMeasureDataList);
-//					mMeasureDataList.clear();
-//				}
-				
-				Bundle data = msg.getData();
-					
-				if (data == null)
-					return;
-					// 无时间戳，无效
-				Long timeStamp = data.getLong("timestamp");
-				if (timeStamp == null)
-					return ;
-				
-				HashMap<String, String> mData = (HashMap<String, String>) data
-						.getSerializable("data");
-				
-//				if (mMeasureDataList == null)
-//					return ;
-				switch (msg.what)
-				{
-				// 处理UMTS
-				case GlobalVar.MSG_HANDLER_MEASURE_UMTS:
-					//mMeasureDataList.add(new MeasureData(timeStamp, "umts", mData.toString()));
-					mDbManager.add(new MeasureData(timeStamp, "umts", mData.toString()));
-					
-					Log.i(TAG,"receive umts data: " + mData.toString());
-					
-					break;
-				// 处理WiFi
-				case GlobalVar.MSG_HANDLER_MEASURE_WIFI:
-					//mMeasureDataList.add(new MeasureData(timeStamp, "wifi", mData.toString()));
-					mDbManager.add(new MeasureData(timeStamp, "wifi", mData.toString()));
-					
-					Log.i(TAG,"receive wifi data: " + mData.toString());
-					
-					break;
-				case GlobalVar.MSG_HANDLER_MEASURE_TRAFFIC:
-					//mMeasureDataList.add(new MeasureData(timeStamp, "traffic", mData.toString()));
-					mDbManager.add(new MeasureData(timeStamp, "traffic", mData.toString()));
-					
-					
-					Log.i(TAG,"receive traffic data: " + mData.toString());
-					
-					break;
-				
-				default:
-					break;
-				}
+			// 处理LTE相关数据
+			case GlobalVar.MSG_HANDLER_MEASURE_LTE:
+				mDbManager.add(new MeasureData(timeStamp, "lte", mData
+						.toString()));
+				Log.i(TAG, "receive lte data: " + mData.toString());
+				break;
+			// 处理WiFi相关数据
+			case GlobalVar.MSG_HANDLER_MEASURE_WIFI:
+				mDbManager.add(new MeasureData(timeStamp, "wifi", mData
+						.toString()));
+				Log.i(TAG, "receive wifi data: " + mData.toString());
+				break;
+			// 处理traffic相关数据
+			case GlobalVar.MSG_HANDLER_MEASURE_TRAFFIC:
+				mDbManager.add(new MeasureData(timeStamp, "traffic", mData
+						.toString()));
+				Log.i(TAG, "receive traffic data: " + mData.toString());
+				break;
+			// 处理TCP相关数据
+			case GlobalVar.MSG_HANDLER_MEASURE_TCP:
+				mDbManager.add(new MeasureData(timeStamp, "tcp", mData
+						.toString()));
+				Log.i(TAG, "receive tcp data: " + mData.toString());
+				break;
+			default:
+				break;
 			}
 		}
+	}
 }
-
-

@@ -3,28 +3,32 @@ package commlab.weejang.demo;
 import android.os.Looper;
 
 /**
- * 参考MediaPlaybackActivity.java
- *  维护测量消息队列
+ * A worker thread with loopful trait 参考MediaPlaybackActivity.java设计
+ * 
  * @author jangwee
- *
  */
 
-public class MeasureDataWorker implements Runnable
+public class LoopfulWorker implements Runnable
 {
-
+	// 锁对象
 	private final Object mLock = new Object();
+	// Looper
 	private Looper mLooper;
-	
+
 	/**
-	 * create measuer thread with the given name.
+	 * @param name
+	 *            the name of loopful worker
 	 */
-		
-	public  MeasureDataWorker(String name)
+	public LoopfulWorker(String name)
 	{
-		Thread t = new Thread(null,this,name);
+		// 创建线程
+		Thread t = new Thread(null, this, name);
+		// 设置最低优先级
 		t.setPriority(Thread.MIN_PRIORITY);
+		// 运行线程
 		t.start();
-		
+
+		// 同步，防止多次创建mLooper
 		synchronized (mLock)
 		{
 			while (mLooper == null)
@@ -34,18 +38,17 @@ public class MeasureDataWorker implements Runnable
 					mLock.wait();
 				} catch (InterruptedException e)
 				{
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
 	}
-	
+
 	public Looper getLooper()
 	{
 		return this.mLooper;
 	}
-	
+
 	@Override
 	public void run()
 	{
@@ -57,7 +60,7 @@ public class MeasureDataWorker implements Runnable
 		}
 		Looper.loop();
 	}
-	
+
 	public void quit()
 	{
 		mLooper.quit();

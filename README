@@ -1,19 +1,4 @@
-This Project is Building for QoE
-
-
--------------------
-	1 implement Measure_UTMS 
-		Technique : [Looper,Handler,MessageQueue,Message] [Reflect]
+This Project is Building for QoE Measure
 
 
 
-
------------------------
-Protocal:
-//
-	public static final int SERVICE_OPERATOR_FLAG_INVALID = -1;//无效的
-	public static final int SERVICE_OPERATOR_FLAG_START = 1; //开始测量
-	public static final int SERVICE_OPERATOR_FLAG_PAUSE = 2;//暂停测量
-	public static final int SERVICE_OPERATOR_FLAG_CONTIUE =3;//暂停之后继续
-	public static final int SERVICE_OPERATOR_FLAG_STOP = 4; //终止测量
-	

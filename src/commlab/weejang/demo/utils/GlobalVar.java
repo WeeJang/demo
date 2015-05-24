@@ -16,6 +16,7 @@ public class GlobalVar
 	public static final int MSG_HANDLER_MEASURE_WIFI = 0x02; // WIFI测量
 	public static final int MSG_HANDLER_MEASURE_TCP = 0x03; // TCP测量
 	public static final int MSG_HANDLER_MEASURE_TRAFFIC = 0x04; // Traffic测量
+	public static final int MSG_HANDLER_MEASURE_PING = 0x05;//Ping测量
 
 	/**
 	 * 控制UMTS测量线程
@@ -71,7 +72,7 @@ public class GlobalVar
 	/**
 	 * 数据上传
 	 */
-	public static final String uploadDataUrl = "http://192.168.1.137:8081/insertSignalMeasureData"; // 上传的数据路径
+	public static final String uploadDataUrl = "http://202.112.146.103:8081/insertSignalMeasureData"; // 上传的数据路径
 	// public static final String uploadDataUrl =
 	// "http://192.168.1.137:8081/insertDashMeasureData"; // 上传的数据路径
 	public static final int uploadSize = 100; // 一次性打包上传的数据量

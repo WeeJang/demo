@@ -17,11 +17,13 @@ public class BootBroadcastReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
+/*
 		if (intent.getAction().equals(ACTION))
 		{
 			Intent startService = new Intent(context,MeasureService.class);
 			startService.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			context.startService(startService);
 		}
+*/
 	}
 }

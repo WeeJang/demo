@@ -43,13 +43,16 @@ public class MeasureService extends Service
 	private MeasureHandler mMeasureHandler;
 
 	// 测量LTE worker
-	private MeasureWorker mMeasureLTEWorker;
+	// private MeasureWorker mMeasureLTEWorker;
 	// 测量WiFi worker
 	private MeasureWorker mMeasureWiFiWorker;
 	// 测量Traffic worker
-	private MeasureWorker mMeasureTrafficWorker;
+	// private MeasureWorker mMeasureTrafficWorker;
 	// 测量TCP worker
-	private MeasureWorker mMeasureTCPWorker;
+	// private MeasureWorker mMeasureTCPWorker;
+	// 测量Ping worker
+	private MeasureWorker mMeasurePingWorker;
+
 	// 测量worker Group
 	private List<MeasureWorker> mMeasureWorkerGroup = new LinkedList<MeasureWorker>();
 
@@ -80,18 +83,23 @@ public class MeasureService extends Service
 		mMeasureWoker = new LoopfulWorker("MeasureAll");
 		mMeasureHandler = new MeasureHandler(mMeasureWoker.getLooper());
 		// 实例化MeasureWorker
-		mMeasureLTEWorker = new MeasureWorker(new CellularNetInfo(
-				MeasureService.this), mMeasureHandler);
+		// mMeasureLTEWorker = new MeasureWorker(new CellularNetInfo(
+		// MeasureService.this), mMeasureHandler);
+		// mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(),
+		// mMeasureHandler);
+		// mMeasureTCPWorker = new MeasureWorker(new TCPInfo(),
+		// mMeasureHandler);
+
 		mMeasureWiFiWorker = new MeasureWorker(
 				new WiFiInfo(MeasureService.this), mMeasureHandler);
-		mMeasureTrafficWorker = new MeasureWorker(new TrafficInfo(),
-				mMeasureHandler);
-		mMeasureTCPWorker = new MeasureWorker(new TCPInfo(), mMeasureHandler);
+		mMeasurePingWorker = new MeasureWorker(new PingInfo(), mMeasureHandler);
+
 		// 添加进组
-		mMeasureWorkerGroup.add(mMeasureLTEWorker);
 		mMeasureWorkerGroup.add(mMeasureWiFiWorker);
-		mMeasureWorkerGroup.add(mMeasureTrafficWorker);
-		mMeasureWorkerGroup.add(mMeasureTCPWorker);
+		// mMeasureWorkerGroup.add(mMeasureLTEWorker);
+		// mMeasureWorkerGroup.add(mMeasureTrafficWorker);
+		// mMeasureWorkerGroup.add(mMeasureTCPWorker);
+		mMeasureWorkerGroup.add(mMeasurePingWorker);
 	}
 
 	@Override
@@ -161,7 +169,6 @@ public class MeasureService extends Service
 		default:
 			break;
 		}
-
 		return START_STICKY;
 	}
 
@@ -287,6 +294,13 @@ public class MeasureService extends Service
 				mDbManager.add(new MeasureData(timeStamp, "tcp", mData
 						.toString()));
 				Log.i(TAG, "receive tcp data: " + mData.toString());
+				break;
+			// 处理ping相关数据
+			// 处理WiFi相关数据
+			case GlobalVar.MSG_HANDLER_MEASURE_PING:
+				mDbManager.add(new MeasureData(timeStamp, "ping", mData
+						.toString()));
+				Log.i(TAG, "receive ping data: " + mData.toString());
 				break;
 			default:
 				break;
